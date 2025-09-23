@@ -1,0 +1,58 @@
+// color
+
+//Neutral colors: 中性色
+$White: #fefeff;
+$Light: #f2f7fa;
+$Light-Gray: #e7ebee;
+$Gray: #c8cacc;
+$Dark-Gray: #a9acad;
+$Deep-Gray: #828486;
+$Charcoal: #393a3a;
+$Black: #0a0a0a;
+
+
+$primary1: #2A77BD;
+$primary2: #F0945B;
+$primary3: #FAE24C;
+
+$bg-1: #8CBCE7;
+$bg-2: #FDF9E8;
+
+$text: #1F0C01;
+
+// font-family
+$family-tc: 'Noto Sans TC';
+$family-en: 'Roboto';
+
+// font-size
+$f-s-12: .75rem;
+$f-s-14: .875rem;
+$f-s-16: 1rem;
+$f-s-18: 1.125rem;
+$f-s-20: 1.25rem;
+$f-s-24: 1.5rem;
+$f-s-28: 1.75rem;
+$f-s-32: 2rem;
+$f-s-40: 2.5rem;
+$f-s-48: 3rem;
+$f-s-64: 4rem;
+$f-s-96: 6rem;
+
+// spacing
+$space-xxs: 5px;
+$space-xs: 10px;
+$space-sm: 15px;
+$space-md: 20px;
+$space-lg: 25px;
+$space-xl: 30px;
+$space-xxl: 50px;
+
+// media
+//RWD
+$mediaxs: "max-width:640px";
+$mediasm: "max-width:820px";
+$mediamd: "max-width:750px";
+$medialg: "max-width:820px";
+$mediaxl: "max-width:1080px";
+$mediaxxl: "max-width:1250px";
+$mediaex: "max-width:1350px";
