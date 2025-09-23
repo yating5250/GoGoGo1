@@ -175,105 +175,207 @@
 
 // HAHSH
 (() => {
-  let inited = false;
+  const {
+    Engine, World, Bodies, Body, Composite,
+    Mouse, MouseConstraint, Events
+  } = Matter;
 
-  function startChipsPhysics() {
-    if (inited) return;
-    inited = true;
+  // ------- 參數，可視需要微調 -------
+  const ZONE_SEL  = '#fallzone';
+  const LIST_SEL  = '#chips';
+  const RESTITUTION = 0.25; // 彈性
+  const FRICTION    = 0.25;
+  const DENSITY     = 0.0015;
+  const SLEEPING    = true; // 啟用睡眠提升效能
+  const TOP_DROP_Y  = 10;   // 生成時的起始高度 (px，自容器頂)
+  const WALL_THICK  = 200;  // 牆厚，給大一點以免穿牆
+  const GROUND_H    = 200;  // 地板厚度
 
-    const { Engine, World, Bodies, Body, Events, Runner, Mouse, MouseConstraint } = Matter;
+  let engine = null;
+  let world  = null;
+  let rafId  = null;
+  let started = false;
+  let destroyed = false;
 
-    const container = document.getElementById('chips');
-    if (!container) return;
+  function init() {
+    if (started) return;
+    started = true;
 
-    let W = container.clientWidth;
-    let H = container.clientHeight;
+    const zone  = document.querySelector(ZONE_SEL);
+    const list  = document.querySelector(LIST_SEL);
+    if (!zone || !list) return;
 
-    const engine = Engine.create();
-    const world  = engine.world;
-    const runner = Runner.create();
-    Runner.run(runner, engine);
+    // 讓觸控預設可以垂直捲
+    zone.style.touchAction = 'pan-y';
 
-    const wallThickness = 80;
-    const floorInset    = 2;
+    // 建立引擎
+    engine = Engine.create({ enableSleeping: SLEEPING });
+    world  = engine.world;
+    world.gravity.y = 1; // 重力
 
-    // === 1) 邊界：地板 + 左右牆 +【天花板】 ===
-    const ground   = Bodies.rectangle(W/2, H - floorInset + wallThickness/2, W, wallThickness, { isStatic: true });
-    const wallLeft = Bodies.rectangle(-wallThickness/2, H/2, wallThickness, H, { isStatic: true });
-    const wallRt   = Bodies.rectangle(W + wallThickness/2, H/2, wallThickness, H, { isStatic: true });
-    const roofY    = -1; // 在容器頂緣內側一點點，避免被拖出去
-    const roof     = Bodies.rectangle(W/2, roofY - wallThickness/2, W + wallThickness*2, wallThickness, { isStatic: true });
-    World.add(world, [ground, wallLeft, wallRt, roof]);  // ← 多了 roof
+    // 尺寸
+    const zoneRect = zone.getBoundingClientRect();
+    const W = zoneRect.width;
+    const H = zoneRect.height;
 
-    // === 2) 生成剛體：改成生在 roof 下方（或稍微在 roof 上方也行）===
-    const items = Array.from(container.querySelectorAll(':scope > li')).map(el => {
-      const w = el.offsetWidth;
-      const h = el.offsetHeight;
+    // 邊界（厚一點以免滑太快穿牆）
+    const ground   = Bodies.rectangle(W/2, H + GROUND_H/2, W + WALL_THICK*2, GROUND_H, { isStatic: true });
+    const roof     = Bodies.rectangle(W/2, -WALL_THICK/2,  W + WALL_THICK*2, WALL_THICK, { isStatic: true });
+    const wallLeft = Bodies.rectangle(-WALL_THICK/2, H/2,  WALL_THICK, H + WALL_THICK*2, { isStatic: true });
+    const wallRight= Bodies.rectangle(W + WALL_THICK/2, H/2, WALL_THICK, H + WALL_THICK*2, { isStatic: true });
+    World.add(world, [ground, roof, wallLeft, wallRight]);
 
-      const x = Math.random() * (W - w) + w / 2;
+    // 讓每一顆 <li> 變成剛體
+    const chips = Array.from(list.children).filter(el => el.tagName === 'LI');
+    const bodies = [];
 
-      // 方案 A：直接生在容器內、頂緣下 8px，重力會讓它自然落下：
-      const y = 8 + h/2;
+    chips.forEach((el, i) => {
+      const w = el.offsetWidth  || 160;
+      const h = el.offsetHeight || 54;
 
-      // 方案 B（想要「從外面掉進來」的視覺）：生在 roof 上方一點：
-      // const y = roofY - wallThickness - 10;
+      // 在容器內部隨機 X，Y 從上方一點點開始掉
+      const x = Math.random() * (W - w) + w/2;
+      const y = TOP_DROP_Y + Math.random() * 20;
 
       const body = Bodies.rectangle(x, y, w, h, {
-        chamfer: { radius: h / 2 },
-        density: 0.0015,
-        friction: 0.25,
-        frictionAir: 0.02,
-        restitution: 0.18,
-        angle: (Math.random() * 36 - 18) * Math.PI / 180
+        chamfer: { radius: h/2 },
+        restitution: RESTITUTION,
+        friction: FRICTION,
+        density: DENSITY
       });
+
+      // 給一點點初始角度 & 隨機轉速
+      Body.rotate(body, (Math.random()-0.5) * 0.2);
+      Body.setAngularVelocity(body, (Math.random()-0.5) * 0.05);
+
       World.add(world, body);
-      return { el, body, w, h };
+      bodies.push({ body, el });
     });
 
-    Events.on(engine, 'afterUpdate', () => {
-      for (const it of items) {
-        const { x, y } = it.body.position;
-        it.el.style.transform =
-          `translate(${x - it.w/2}px, ${y - it.h/2}px) rotate(${it.body.angle}rad)`;
-      }
-    });
-
-    // 滑鼠拖拉
-    const mouse = Mouse.create(container);
+    // 滑鼠拖拽（不讓 wheel 影響頁面滾動，等會用捕獲攔掉）
+    const mouse = Mouse.create(zone); // 綁在 zone 上
     const mouseConstraint = MouseConstraint.create(engine, {
       mouse,
-      constraint: { stiffness: 0.2 }
+      constraint: { stiffness: 0.2, render: { visible: false } }
     });
     World.add(world, mouseConstraint);
 
-    // === 3) RWD：記得重新定位 roof ===
-    const ro = new ResizeObserver(() => {
-      const newW = container.clientWidth;
-      const newH = container.clientHeight;
+    // ***關鍵***：在捕獲階段攔掉 wheel/touchmove，只 stop，不 preventDefault
+    // 這樣事件不會傳到 Matter 的 wheel handler（它會 preventDefault），頁面就能正常捲動
+    const stopMatterWheel = (e) => { e.stopImmediatePropagation(); };
+    zone.addEventListener('wheel',           stopMatterWheel, { capture: true, passive: true });
+    zone.addEventListener('mousewheel',      stopMatterWheel, { capture: true, passive: true });
+    zone.addEventListener('DOMMouseScroll',  stopMatterWheel, { capture: true, passive: true });
+    zone.addEventListener('touchmove',       stopMatterWheel, { capture: true, passive: true });
 
-      Body.setPosition(ground,   { x: newW/2, y: newH - floorInset + wallThickness/2 });
-      Body.setPosition(wallLeft, { x: -wallThickness/2, y: newH/2 });
-      Body.setPosition(wallRt,   { x: newW + wallThickness/2, y: newH/2 });
-      Body.setPosition(roof,     { x: newW/2, y: roofY - wallThickness/2 });
-
-      const ratio = newW / W || 1;
-      items.forEach(({ body }) => {
-        Body.setPosition(body, { x: body.position.x * ratio, y: body.position.y });
-      });
-
-      W = newW; H = newH;
-    });
-    ro.observe(container);
-  }
-
-  const zone = document.getElementById('fallzone');
-  const io = new IntersectionObserver((ents) => {
-    ents.forEach(e => {
-      if (e.isIntersecting) {
-        startChipsPhysics();
-        io.unobserve(zone);
+    // 將剛體位置/角度同步到 DOM
+    Events.on(engine, 'afterUpdate', () => {
+      for (const { body, el } of bodies) {
+        const { x, y } = body.position;
+        el.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${body.angle}rad)`;
+        el.style.position = 'absolute';
+        el.style.left = '0';
+        el.style.top  = '0';
+        el.style.willChange = 'transform';
       }
     });
-  });
-  io.observe(zone);
+
+    // requestAnimationFrame 手動步進（比 Render.run 更省）
+    const step = (t) => {
+      Engine.update(engine, 1000 / 60);
+      rafId = requestAnimationFrame(step);
+    };
+    rafId = requestAnimationFrame(step);
+
+    // 視窗縮放：重建世界（最穩定）
+    const onResize = debounce(() => rebuild(zone, list), 200);
+    window.addEventListener('resize', onResize);
+
+    // 視窗/頁籤不可見 → 暫停；回來 → 繼續
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) pause();
+      else resume();
+    });
+
+    // 進出視口：出視口就暫停、進視口就繼續
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.target !== zone) return;
+        if (e.isIntersecting) resume(); else pause();
+      });
+    }, { threshold: 0.01 });
+    io.observe(zone);
+
+    // 保存到 zone，供重建/清理
+    zone.__fallchips = { engine, world, bodies, mouse, mouseConstraint, rafId, io, onResize, listeners: { stopMatterWheel } };
+
+    // 工具
+    function pause() {
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    }
+    function resume() {
+      if (!rafId) rafId = requestAnimationFrame(step);
+    }
+  }
+
+  function rebuild(zone, list) {
+    destroy(zone); // 先清理
+    started = false; // 允許重建
+    init(); // 重新初始化
+  }
+
+  function destroy(zoneEl) {
+    const zone = zoneEl || document.querySelector(ZONE_SEL);
+    const ctx = zone && zone.__fallchips;
+    if (!ctx || destroyed) return;
+
+    destroyed = true;
+
+    // 解除事件
+    window.removeEventListener('resize', ctx.onResize);
+    ctx.io && ctx.io.disconnect();
+
+    const { stopMatterWheel } = ctx.listeners || {};
+    if (stopMatterWheel) {
+      zone.removeEventListener('wheel',           stopMatterWheel, { capture: true });
+      zone.removeEventListener('mousewheel',      stopMatterWheel, { capture: true });
+      zone.removeEventListener('DOMMouseScroll',  stopMatterWheel, { capture: true });
+      zone.removeEventListener('touchmove',       stopMatterWheel, { capture: true });
+    }
+
+    // 停 raf
+    if (ctx.rafId) cancelAnimationFrame(ctx.rafId);
+
+    // 清物理世界
+    try {
+      Composite.clear(ctx.engine.world, false);
+      Engine.clear(ctx.engine);
+    } catch (_) {}
+
+    zone.__fallchips = null;
+    destroyed = false;
+  }
+
+  // 小工具：防抖
+  function debounce(fn, delay = 200) {
+    let timer = null;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
+  }
+
+  // 只在 fallzone 真的進入視口時才啟動，避免初載負擔
+  const zoneEl = document.querySelector(ZONE_SEL);
+  if (!zoneEl) return;
+
+  const onceIO = new IntersectionObserver((entries, io) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        init();
+        io.disconnect();
+      }
+    });
+  }, { threshold: 0.01 });
+  onceIO.observe(zoneEl);
 })();
