@@ -10,6 +10,25 @@
 </head>
 
 <body>
+   <div  id="custom-cursor" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M3.40033 18.2842C3.39829 17.9816 3.43784 17.6802 3.51849 17.3896L3.61322 17.1025L3.61615 17.0938C3.93157 16.1989 4.60654 15.6816 5.40326 15.1729L5.75189 14.9541C6.54836 14.4587 7.40316 13.9362 7.9599 12.9844C8.66122 11.7843 9.1667 10.8941 9.76556 10.2881C10.3331 9.71382 10.9829 9.40039 12.0029 9.40039C13.0228 9.4004 13.6718 9.71405 14.2382 10.2881C14.836 10.8939 15.3404 11.7838 16.04 12.9844V12.9854C16.5961 13.9348 17.447 14.4554 18.2431 14.9502V14.9512C19.1879 15.5381 20.0196 16.0682 20.3788 17.0928L20.3828 17.1035C20.5275 17.4806 20.6007 17.8813 20.5995 18.2852V18.2861C20.5995 20.0003 19.2596 21.3496 17.7988 21.3496C16.997 21.3496 16.0692 21.149 15.0576 20.9336C14.068 20.7228 13.0051 20.5 12.0078 20.5C11.0107 20.5 9.94002 20.7228 8.94525 20.9336C7.92784 21.1492 6.99734 21.3496 6.20599 21.3496C4.76397 21.3494 3.40033 19.9976 3.40033 18.2861V18.2842Z"
+        fill="white" stroke="black" stroke-width="0.8" />
+      <path
+        d="M3.375 7.15039C4.51611 7.15039 5.59961 8.38258 5.59961 10.125C5.59961 11.8674 4.51611 13.0996 3.375 13.0996C2.23389 13.0996 1.15039 11.8674 1.15039 10.125C1.15039 8.38258 2.23389 7.15039 3.375 7.15039Z"
+        fill="white" stroke="black" stroke-width="0.8" />
+      <path
+        d="M8.625 2.65039C9.76611 2.65039 10.8496 3.88258 10.8496 5.625C10.8496 7.36742 9.76611 8.59961 8.625 8.59961C7.48389 8.59961 6.40039 7.36742 6.40039 5.625C6.40039 3.88258 7.48389 2.65039 8.625 2.65039Z"
+        fill="white" stroke="black" stroke-width="0.8" />
+      <path
+        d="M15.375 2.65039C16.5161 2.65039 17.5996 3.88258 17.5996 5.625C17.5996 7.36742 16.5161 8.59961 15.375 8.59961C14.2339 8.59961 13.1504 7.36742 13.1504 5.625C13.1504 3.88258 14.2339 2.65039 15.375 2.65039Z"
+        fill="white" stroke="black" stroke-width="0.8" />
+      <path
+        d="M20.625 7.15039C21.7661 7.15039 22.8496 8.38258 22.8496 10.125C22.8496 11.8674 21.7661 13.0996 20.625 13.0996C19.4839 13.0996 18.4004 11.8674 18.4004 10.125C18.4004 8.38258 19.4839 7.15039 20.625 7.15039Z"
+        fill="white" stroke="black" stroke-width="0.8" />
+    </svg>
+  </div>
   <header>
     <div class="logo">
       <h2>GOGOGO</h2>
@@ -27,10 +46,53 @@
     <section id="banner">
       <div class="hero">
         <div class="title">
-          <h1>寵物友善地圖</h1>
+          <h1 id="petmap-title" data-no-paw>寵物友善地圖</h1>
           <h2><span>Go</span> eat, <span>Go</span> stay, <span>Go</span> play</h2>
         </div>
-        <figure><img src="./images/dog.svg" alt=""></figure>
+        <figure>
+          <!-- 底圖：沒眼＋沒鼻 -->
+          <img src="./images/dog-noall.svg" alt="" />
+
+          <!-- 疊層：眼睛＋鼻子（一定要有這個 SVG wrapper！） -->
+          <svg class="gogo-eyes" viewBox="0 0 623 480" aria-hidden="true">
+            <!-- 眼白 -->
+            <circle id="eyeL" cx="236.616" cy="160.993" r="30" fill="#fff" />
+            <circle id="eyeR" cx="389.616" cy="160.993" r="30" fill="#fff" />
+
+            <!-- 瞳孔 30×40 -->
+            <ellipse id="pL" cx="236.616" cy="160.993" rx="15" ry="20" fill="#111" />
+            <ellipse id="pR" cx="389.616" cy="160.993" rx="15" ry="20" fill="#111" />
+
+            <!-- clipPath 用 viewBox 座標 -->
+            <defs>
+              <clipPath id="clipEyeL" clipPathUnits="userSpaceOnUse">
+                <circle cx="236.616" cy="160.993" r="30" />
+              </clipPath>
+              <clipPath id="clipEyeR" clipPathUnits="userSpaceOnUse">
+                <circle cx="389.616" cy="160.993" r="30" />
+              </clipPath>
+            </defs>
+
+            <!-- 眼皮：矩形從上往下滑（被 clip 限制在圓內） -->
+            <!-- x = cx - r, y = cy - r, width = height = 2r -->
+            <g class="lids">
+              <rect class="lid lidL" clip-path="url(#clipEyeL)" x="206.616" y="130.993" width="60" height="60"
+                fill="#fff" />
+              <rect class="lid lidR" clip-path="url(#clipEyeR)" x="359.616" y="130.993" width="60" height="60"
+                fill="#fff" />
+            </g>
+
+            <!-- 鼻子 -->
+            <g id="nose" transform="translate(190,190)">
+              <path
+                d="M10 84.5227C10 84.5227 16 129.023 67.5 134.523C119 140.023 125 77.0227 125 77.0227C125 77.0227 139 134.523 183 134.523C227 134.523 240 81.5227 240 81.5227"
+                stroke="black" fill="none" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" />
+              <path
+                d="M152.424 2.23904C137.307 -1.72696 109.924 0.863034 99.4243 2.36303C89.0193 3.84903 76.5473 8.86303 72.9243 17.863C70.2263 24.565 69.2953 27.863 71.9243 36.363C74.5523 44.863 98.6193 79.553 125.424 79.363C151.043 79.181 177.159 46.363 178.924 36.363C180.688 26.363 178.924 23.863 176.424 17.739C173.924 11.616 162.424 4.86304 152.424 2.23904Z"
+                fill="black" />
+            </g>
+          </svg>
+        </figure>
       </div>
     </section>
 
@@ -89,40 +151,40 @@
       <div class="choicebox">
         <div class="line"></div>
         <div class="choices">
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>亞洲美食</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>韓國美食</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>泰國美食</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>義大利美食</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>台灣美食</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>戶外草坪</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>早餐和早午餐</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>甜點</h4>
           </div>
         </div>
         <div class="line"></div>
       </div>
       <div class="cards-shell">
-        <div class="left"></div>
+        <div class="left" data-no-paw></div>
         <div class="cards-viewport">
           <div class="cards-all">
 
             <article class="cards">
-              <div class="card ">
+              <div class="card " data-no-paw>
                 <div class="pic img-1" style="--bg:url('../images/eat-taiwan-1.jpg')">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -172,7 +234,7 @@
                   </div>
                 </article>
               </div>
-              <div class="card ">
+              <div class="card " data-no-paw>
                 <div class="pic img-2">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -222,7 +284,7 @@
                   </div>
                 </article>
               </div>
-              <div class="card ">
+              <div class="card " data-no-paw>
                 <div class="pic img-3">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -272,7 +334,7 @@
                   </div>
                 </article>
               </div>
-              <div class="card">
+              <div class="card" data-no-paw>
                 <div class="pic img-4">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -325,9 +387,9 @@
             </article>
           </div>
         </div>
-        <div class="right"></div>
+        <div class="right" data-no-paw></div>
       </div>
-      <a href="#" class="all-button">
+      <a href="#" class="all-button" data-no-paw>
         <svg width="24" height="24" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M16.432 13.9269C16.1055 12.9955 15.3444 12.5234 14.6096 12.067C13.9702 11.6696 13.3664 11.294 12.9716 10.6197C11.8832 8.75201 11.2853 7.625 9.50223 7.625C7.71913 7.625 7.11944 8.75238 6.02842 10.6194C5.63321 11.2951 5.02647 11.6714 4.38633 12.0696C3.65157 12.5264 2.89194 12.9973 2.56426 13.9269C2.43676 14.2621 2.37259 14.6181 2.375 14.9767C2.375 16.4886 3.5792 17.7188 4.91329 17.7188C6.24737 17.7188 8.00487 17.046 9.50594 17.046C11.007 17.046 12.74 17.7188 14.0908 17.7188C15.4416 17.7188 16.625 16.4886 16.625 14.9767C16.6261 14.6179 16.5606 14.2619 16.432 13.9269Z" />
@@ -363,43 +425,43 @@
       <div class="choicebox">
         <div class="line"></div>
         <div class="choices">
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>北部</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>東部</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>中部</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>南部</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>離島地區</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>泳池</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>戶外陽台/草坪</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>大型犬</h4>
           </div>
-          <div class="choice" tabindex="0" role="button" aria-pressed="false">
+          <div class="choice" data-no-paw tabindex="0" role="button" aria-pressed="false">
             <h4>寵物可上床</h4>
           </div>
         </div>
         <div class="line"></div>
       </div>
       <div class="cards-shell">
-        <div class="left"></div>
+        <div class="left" data-no-paw></div>
         <div class="cards-viewport">
           <div class="cards-all">
 
             <article class="cards">
-              <div class="card">
+              <div class="card" data-no-paw>
                 <div class="pic img-1">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -449,7 +511,7 @@
                   </div>
                 </article>
               </div>
-              <div class="card">
+              <div class="card" data-no-paw>
                 <div class="pic img-2">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -499,7 +561,7 @@
                   </div>
                 </article>
               </div>
-              <div class="card">
+              <div class="card" data-no-paw>
                 <div class="pic img-3">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -549,7 +611,7 @@
                   </div>
                 </article>
               </div>
-              <div class="card">
+              <div class="card" data-no-paw>
                 <div class="pic img-4">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -602,9 +664,9 @@
             </article>
           </div>
         </div>
-        <div class="right"></div>
+        <div class="right" data-no-paw></div>
       </div>
-      <a href="#" class="all-button">
+      <a href="#" class="all-button" data-no-paw>
         <svg width="24" height="24" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M16.432 13.9269C16.1055 12.9955 15.3444 12.5234 14.6096 12.067C13.9702 11.6696 13.3664 11.294 12.9716 10.6197C11.8832 8.75201 11.2853 7.625 9.50223 7.625C7.71913 7.625 7.11944 8.75238 6.02842 10.6194C5.63321 11.2951 5.02647 11.6714 4.38633 12.0696C3.65157 12.5264 2.89194 12.9973 2.56426 13.9269C2.43676 14.2621 2.37259 14.6181 2.375 14.9767C2.375 16.4886 3.5792 17.7188 4.91329 17.7188C6.24737 17.7188 8.00487 17.046 9.50594 17.046C11.007 17.046 12.74 17.7188 14.0908 17.7188C15.4416 17.7188 16.625 16.4886 16.625 14.9767C16.6261 14.6179 16.5606 14.2619 16.432 13.9269Z" />
@@ -629,7 +691,7 @@
         </figure>
         <section class="fallzone" id="fallzone">
           <ul class="chips" id="chips">
-            <li class="is-yellow">
+            <li class="is-yellow" data-no-paw>
               <svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M16.432 13.9269c-.3265-.9314-1.0876-1.4035-1.8224-1.8599-.6394-.3974-1.2432-.773-1.638-1.4473C11.8832 8.75201 11.2853 7.625 9.50223 7.625S7.11944 8.75238 6.02842 10.6194c-.39521.6757-1.00195 1.052-1.64209 1.4502-.73476.4568-1.49439.9277-1.82207 1.8573-.1275.3352-.19167.6912-.18926 1.0498 0 1.5119 1.2042 2.7421 2.53829 2.7421s3.09158-.6728 4.59265-.6728 2.73406.6728 4.08486.6728 2.5342-1.2302 2.5342-2.7421c.0011-.3588-.0644-.7148-.193-.04924Z"
@@ -649,46 +711,46 @@
               </svg>義式
             </li>
 
-            <li><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
+            <li data-no-paw><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <use href="#paws" />
               </svg>韓式</li>
-            <li class="is-blue"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
+            <li data-no-paw class="is-blue"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <use href="#paws" />
               </svg>可上沙發</li>
-            <li><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
+            <li data-no-paw><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <use href="#paws" />
               </svg>須付清潔費</li>
-            <li class="is-yellow"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
+            <li data-no-paw class="is-yellow"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <use href="#paws" />
               </svg>美式</li>
-            <li><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
+            <li data-no-paw><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <use href="#paws" />
               </svg>提供寵物餐</li>
-            <li class="is-blue"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
+            <li data-no-paw class="is-blue"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <use href="#paws" />
               </svg>有附寵物用品</li>
-            <li class="is-yellow"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
+            <li data-no-paw class="is-yellow"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <use href="#paws" />
               </svg>戶外草坪</li>
-            <li><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
+            <li data-no-paw><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <use href="#paws" />
               </svg>寵物可落地</li>
-            <li class="is-blue"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
+            <li data-no-paw class="is-blue"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <use href="#paws" />
               </svg>可大型犬</li>
-            <li><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
+            <li data-no-paw><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <use href="#paws" />
               </svg>需牽繩</li>
-            <li class="is-blue"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
+            <li data-no-paw class="is-blue"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <use href="#paws" />
               </svg>需推車</li>
-            <li class="is-yellow"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
+            <li data-no-paw class="is-yellow"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <use href="#paws" />
               </svg>狗狗圍欄</li>
-            <li><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
+            <li data-no-paw><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <use href="#paws" />
               </svg>西式</li>
-            <li class="is-blue"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
+            <li data-no-paw class="is-blue"><svg width="24" height="24" viewBox="0 0 19 20" xmlns="http://www.w3.org/2000/svg">
                 <use href="#paws" />
               </svg>最佳寵物餐廳</li>
           </ul>
@@ -736,7 +798,7 @@
       <figure class="flag"><img src="./images/flag.svg" alt=""></figure>
       <figure class="dancedog"><img src="./images/dancedog.svg" alt=""></figure>
       <div class="play-boxs">
-        <article class="play-box">
+        <article class="play-box" data-no-paw>
           <h4>09/06（六）</h4>
           <h3>寵物市集</h3>
           <p>結合寵物用品、美食、攝影攤位，還有小型互動遊戲。讓飼主邊逛邊帶毛孩體驗週末市集的樂趣。</p>
@@ -754,7 +816,7 @@
                 d="M16.3281 11.1875C17.4758 11.1875 18.4062 9.99126 18.4062 8.51562C18.4062 7.03999 17.4758 5.84375 16.3281 5.84375C15.1804 5.84375 14.25 7.03999 14.25 8.51562C14.25 9.99126 15.1804 11.1875 16.3281 11.1875Z" />
             </svg>查看活動</a>
         </article>
-        <article class="play-box">
+        <article class="play-box" data-no-paw>
           <h4>09/13（六）</h4>
           <h3>寵物搭捷運日</h3>
           <p>和捷運公司合作，舉辦「毛孩一起搭捷運」的一日體驗，宣導正確攜帶方式，推廣寵物友善交通。</p>
@@ -772,7 +834,7 @@
                 d="M16.3281 11.1875C17.4758 11.1875 18.4062 9.99126 18.4062 8.51562C18.4062 7.03999 17.4758 5.84375 16.3281 5.84375C15.1804 5.84375 14.25 7.03999 14.25 8.51562C14.25 9.99126 15.1804 11.1875 16.3281 11.1875Z" />
             </svg>查看活動</a>
         </article>
-        <article class="play-box">
+        <article class="play-box" data-no-paw>
           <h4>09/20（六）</h4>
           <h3>寵物野餐日</h3>
           <p>大草地上的毛孩野餐聚會，現場提供 DIY 寵物零食、遊戲區，主人與毛孩一起享受陽光午後。</p>
@@ -790,7 +852,7 @@
                 d="M16.3281 11.1875C17.4758 11.1875 18.4062 9.99126 18.4062 8.51562C18.4062 7.03999 17.4758 5.84375 16.3281 5.84375C15.1804 5.84375 14.25 7.03999 14.25 8.51562C14.25 9.99126 15.1804 11.1875 16.3281 11.1875Z" />
             </svg>查看活動</a>
         </article>
-        <article class="play-box">
+        <article class="play-box" data-no-paw>
           <div class="p-box-title">
             <h4>09/27（六）</h4>
             <h3>寵物義診與健檢</h3>
@@ -810,7 +872,7 @@
                 d="M16.3281 11.1875C17.4758 11.1875 18.4062 9.99126 18.4062 8.51562C18.4062 7.03999 17.4758 5.84375 16.3281 5.84375C15.1804 5.84375 14.25 7.03999 14.25 8.51562C14.25 9.99126 15.1804 11.1875 16.3281 11.1875Z" />
             </svg>查看活動</a>
         </article>
-        <article class="play-box">
+        <article class="play-box" data-no-paw>
           <div class="p-box-title">
             <h4>10/04（六）</h4>
             <h3>寵物領養日</h3>
@@ -831,7 +893,7 @@
             </svg>查看活動</a>
         </article>
       </div>
-      <a href="#" class="all-button">
+      <a href="#" class="all-button" data-no-paw>
         <svg width="24" height="24" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M16.432 13.9269C16.1055 12.9955 15.3444 12.5234 14.6096 12.067C13.9702 11.6696 13.3664 11.294 12.9716 10.6197C11.8832 8.75201 11.2853 7.625 9.50223 7.625C7.71913 7.625 7.11944 8.75238 6.02842 10.6194C5.63321 11.2951 5.02647 11.6714 4.38633 12.0696C3.65157 12.5264 2.89194 12.9973 2.56426 13.9269C2.43676 14.2621 2.37259 14.6181 2.375 14.9767C2.375 16.4886 3.5792 17.7188 4.91329 17.7188C6.24737 17.7188 8.00487 17.046 9.50594 17.046C11.007 17.046 12.74 17.7188 14.0908 17.7188C15.4416 17.7188 16.625 16.4886 16.625 14.9767C16.6261 14.6179 16.5606 14.2619 16.432 13.9269Z" />
@@ -868,8 +930,9 @@
     <div class="copywrite">Copywrite&copy;2025GOGOGO.</div>
   </footer>
 
-
+ 
   <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="./js/script.js"></script>
 </body>
 

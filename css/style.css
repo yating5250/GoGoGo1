@@ -557,6 +557,7 @@ header ul li:nth-child(4) a {
   color: #fefeff;
 }
 
+/* 眼皮動畫只針對 <rect class="lid">，不要套在 <g> */
 #banner {
   width: 100%;
   height: 165vh;
@@ -626,6 +627,7 @@ header ul li:nth-child(4) a {
   letter-spacing: 12.8px;
   position: relative;
   white-space: nowrap;
+  /* 當球落到字上時，JS 會加 lit 在該字 */
 }
 @media (max-width:750px) {
   #banner .hero .title h1 {
@@ -641,6 +643,9 @@ header ul li:nth-child(4) a {
   width: 29px;
   height: 29px;
   border-radius: 999px;
+  /* 🔑 用 transform 做動畫 */
+  transform: translate(var(--ball-x, 0), var(--ball-y, 0));
+  transition: transform var(--ball-dur, 0.18s) var(--ball-ease, cubic-bezier(0.25, 0.1, 0.25, 1));
 }
 @media (max-width:750px) {
   #banner .hero .title h1::before {
@@ -666,6 +671,9 @@ header ul li:nth-child(4) a {
     right: -15px;
   }
 }
+#banner .hero .title h1 .ch.lit {
+  color: #FAE24C;
+}
 #banner .hero .title h2 {
   color: #fefeff;
   font-family: "Noto Sans TC";
@@ -683,9 +691,7 @@ header ul li:nth-child(4) a {
 #banner .hero .title h2 span {
   color: #F0945B;
   font-size: 3rem;
-  font-style: normal;
   font-weight: 700;
-  line-height: normal;
   letter-spacing: 5px;
 }
 @media (max-width:750px) {
@@ -721,10 +727,59 @@ header ul li:nth-child(4) a {
 @media (max-width:750px) {
   #banner .hero figure img {
     width: 100%;
-    margin-left: 0px;
+    margin-left: 0;
   }
 }
 
+/* =============================
+ * 疊層 SVG（眼睛＋鼻子）
+ * ============================= */
+#banner .hero figure {
+  position: relative;
+}
+#banner .hero figure .gogo-eyes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  /* 不擋滑鼠/觸控 */
+  /* ── 眼皮（rect + clipPath，從上往下蓋） ── */
+  /* ── transform 常動到的元素，給效能提示 ── */
+  /* 偵錯：顯示眼白邊界（不隨縮放變粗） */
+}
+#banner .hero figure .gogo-eyes .lids .lid {
+  /* 只用 translateY，避免 scale 造成白圈 */
+  transform: translateY(100%);
+  /* 平時放在上方，不蓋眼白 */
+  will-change: transform;
+  backface-visibility: hidden;
+}
+#banner .hero figure .gogo-eyes .lids.blinking .lid {
+  animation: blinkSlideDown 0.16s cubic-bezier(0.3, 0, 0.2, 1) 1 both;
+}
+#banner .hero figure .gogo-eyes #pL,
+#banner .hero figure .gogo-eyes #pR,
+#banner .hero figure .gogo-eyes #nose {
+  will-change: transform;
+}
+#banner .hero figure .gogo-eyes.debug #eyeL,
+#banner .hero figure .gogo-eyes.debug #eyeR {
+  stroke: rgba(0, 0, 0, 0.25);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+/* =============================
+ * 無障礙：減少動效時關閉眨眼
+ * ============================= */
+@media (prefers-reduced-motion: reduce) {
+  #banner .hero figure .gogo-eyes .lids .lid {
+    animation: none !important;
+    transform: translateY(-100%) !important;
+  }
+}
 #about {
   width: 100%;
   padding-top: 90px;
@@ -1169,6 +1224,7 @@ header ul li:nth-child(4) a {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 0 50px;
   /* =========================
   清掉全域 ul flex 的影響
   ========================= */
@@ -1183,7 +1239,7 @@ header ul li:nth-child(4) a {
   width: 100%;
   display: flex;
   margin-top: -80px;
-  padding-left: 200px;
+  padding-left: 150px;
   margin-bottom: -40px;
   z-index: 10;
 }
@@ -1221,21 +1277,20 @@ header ul li:nth-child(4) a {
 #stay .s-b-hahs .fallzone {
   position: relative;
   width: 100%;
-  padding: 0 50px;
   overflow: hidden;
   z-index: 5;
   background: #FFF8E6;
-  margin-top: -300px;
 }
 #stay .s-b-hahs .fallzone .chips {
   display: block !important;
   position: relative;
   height: 100%;
-  height: 500px;
+  height: 300px;
   width: 100%;
   margin: 0 !important;
   padding: 0 !important;
   list-style: none !important;
+  touch-action: pan-y;
 }
 #stay .s-b-hahs .fallzone .chips > li {
   position: absolute !important;
@@ -1612,4 +1667,108 @@ footer .copywrite {
   font-size: 0.875rem;
   font-style: normal;
   font-weight: 200;
+}
+
+body {
+  cursor: none;
+}
+
+/* 啟用自訂游標時加在 <body> 的 class */
+body.use-custom-cursor {
+  cursor: none !important;
+}
+
+/* 把整頁所有元素的系統游標都隱藏（含 link/btn） */
+body.use-custom-cursor :where(*) {
+  cursor: none !important;
+}
+
+/* 自訂游標本體 */
+#custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 32px;
+  /* 想多大改這裡 */
+  height: 32px;
+  pointer-events: none;
+  /* 不擋點擊/hover */
+  transform: translate(-50%, -50%) scale(1);
+  transition: transform 0.15s cubic-bezier(0.3, 1.5, 0.5, 1);
+  z-index: 999999;
+  /* 蓋在最上層 */
+}
+
+#custom-cursor svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 按下去縮小 */
+#custom-cursor.active {
+  transform: translate(-50%, -50%) scale(0.82);
+}
+
+/* 只在可用精細指標（滑鼠）時啟用；觸控裝置自動還原 */
+@media (pointer: coarse) {
+  body.use-custom-cursor,
+  body.use-custom-cursor :where(*) {
+    cursor: auto !important;
+  }
+  #custom-cursor {
+    display: none;
+  }
+}
+/* 隱藏系統游標（桌面） */
+html,
+body {
+  cursor: none;
+}
+
+/* 自訂游標：固定在視窗上、跟滑鼠走 */
+#custom-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 32px;
+  height: 32px;
+  /* 想改大小改這裡 */
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: none;
+  z-index: 10000;
+  transition: transform 0.15s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+#custom-cursor.active {
+  transform: translate(-50%, -50%) scale(0.82);
+}
+
+/* 單一爪印（插在 body，跟著頁面內容捲動） */
+.paw {
+  position: absolute;
+  /* 關鍵：absolute + page 座標 */
+  left: 0;
+  top: 0;
+  width: 32px;
+  height: 32px;
+  /* 爪印圖尺寸（建議 32x32 PNG） */
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  z-index: 9999;
+  opacity: 0.8;
+}
+
+/* 觸控裝置：還原系統游標、隱藏自訂游標 */
+@media (pointer: coarse) {
+  html,
+  body {
+    cursor: auto;
+  }
+  #custom-cursor {
+    display: none;
+  }
 }

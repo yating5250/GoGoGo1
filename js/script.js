@@ -175,25 +175,25 @@
 
 // HAHSH
 (() => {
-  const {
-    Engine, World, Bodies, Body, Composite,
-    Mouse, MouseConstraint, Events
-  } = Matter;
+  const { Engine, World, Bodies, Body, Composite, Mouse, MouseConstraint, Events } = Matter;
 
-  // ------- 參數，可視需要微調 -------
-  const ZONE_SEL  = '#fallzone';
-  const LIST_SEL  = '#chips';
-  const RESTITUTION = 0.25; // 彈性
+  // ===== 可調參數 =====
+  const TRIGGER_SEL = '.s-b-hahs'; // 進到這區就播放一次
+  const ZONE_SEL    = '#fallzone'; // 掉落容器（要 overflow:hidden）
+  const LIST_SEL    = '#chips';    // 內含 <li> 籌碼
+
+  const RESTITUTION = 0.25;
   const FRICTION    = 0.25;
   const DENSITY     = 0.0015;
-  const SLEEPING    = true; // 啟用睡眠提升效能
-  const TOP_DROP_Y  = 10;   // 生成時的起始高度 (px，自容器頂)
-  const WALL_THICK  = 200;  // 牆厚，給大一點以免穿牆
-  const GROUND_H    = 200;  // 地板厚度
+  const SLEEPING    = true;
+  const TOP_DROP_Y  = 10;
+  const WALL_THICK  = 200;
+  const GROUND_H    = 200;
+  const MARGIN      = 8;   // 生成時左右內縮，避免一出生就卡牆
 
-  let engine = null;
-  let world  = null;
-  let rafId  = null;
+  const IO_THRESHOLD = 0.5; // 👈 進視窗比例（>=50%）
+  let isPlaying = false;
+
   let started = false;
   let destroyed = false;
 
@@ -201,40 +201,46 @@
     if (started) return;
     started = true;
 
-    const zone  = document.querySelector(ZONE_SEL);
-    const list  = document.querySelector(LIST_SEL);
+    const zone = document.querySelector(ZONE_SEL);
+    const list = document.querySelector(LIST_SEL);
     if (!zone || !list) return;
 
-    // 讓觸控預設可以垂直捲
     zone.style.touchAction = 'pan-y';
 
-    // 建立引擎
-    engine = Engine.create({ enableSleeping: SLEEPING });
-    world  = engine.world;
-    world.gravity.y = 1; // 重力
+    // ---- 以 padding 盒為座標系（(0,0) 就是內容區左上角）----
+    const W = zone.clientWidth;   // 已含 padding
+    const H = zone.clientHeight;
 
-    // 尺寸
-    const zoneRect = zone.getBoundingClientRect();
-    const W = zoneRect.width;
-    const H = zoneRect.height;
+    // ---- 建立引擎/世界 ----
+    const engine = Engine.create({ enableSleeping: SLEEPING });
+    const world  = engine.world;
+    world.gravity.y = 1;
 
-    // 邊界（厚一點以免滑太快穿牆）
-    const ground   = Bodies.rectangle(W/2, H + GROUND_H/2, W + WALL_THICK*2, GROUND_H, { isStatic: true });
-    const roof     = Bodies.rectangle(W/2, -WALL_THICK/2,  W + WALL_THICK*2, WALL_THICK, { isStatic: true });
-    const wallLeft = Bodies.rectangle(-WALL_THICK/2, H/2,  WALL_THICK, H + WALL_THICK*2, { isStatic: true });
-    const wallRight= Bodies.rectangle(W + WALL_THICK/2, H/2, WALL_THICK, H + WALL_THICK*2, { isStatic: true });
+    // ---- 牆體：對齊 0..W / 0..H ----
+    const ground    = Bodies.rectangle(W/2, H + GROUND_H/2, W + WALL_THICK*2, GROUND_H, { isStatic: true });
+    const roof      = Bodies.rectangle(W/2, -WALL_THICK/2,  W + WALL_THICK*2, WALL_THICK, { isStatic: true });
+    const wallLeft  = Bodies.rectangle(-WALL_THICK/2, H/2,  WALL_THICK, H + WALL_THICK*2, { isStatic: true });
+    const wallRight = Bodies.rectangle(W + WALL_THICK/2, H/2, WALL_THICK, H + WALL_THICK*2, { isStatic: true });
     World.add(world, [ground, roof, wallLeft, wallRight]);
 
-    // 讓每一顆 <li> 變成剛體
-    const chips = Array.from(list.children).filter(el => el.tagName === 'LI');
+    // ---- 每個 <li> 變剛體 ----
+    const chips  = Array.from(list.children).filter(el => el.tagName === 'LI');
     const bodies = [];
 
-    chips.forEach((el, i) => {
+    chips.forEach((el) => {
+      // 清前次 transform，交給物理世界接管
+      el.style.transform  = '';
+      el.style.position   = 'absolute';
+      el.style.left       = '0';
+      el.style.top        = '0';
+      el.style.willChange = 'transform';
+
       const w = el.offsetWidth  || 160;
       const h = el.offsetHeight || 54;
 
-      // 在容器內部隨機 X，Y 從上方一點點開始掉
-      const x = Math.random() * (W - w) + w/2;
+      const minX = w/2 + MARGIN;
+      const maxX = Math.max(minX, W - w/2 - MARGIN);
+      const x = Math.random() * (maxX - minX) + minX;  // 內容區內生成
       const y = TOP_DROP_Y + Math.random() * 20;
 
       const body = Bodies.rectangle(x, y, w, h, {
@@ -244,7 +250,6 @@
         density: DENSITY
       });
 
-      // 給一點點初始角度 & 隨機轉速
       Body.rotate(body, (Math.random()-0.5) * 0.2);
       Body.setAngularVelocity(body, (Math.random()-0.5) * 0.05);
 
@@ -252,130 +257,536 @@
       bodies.push({ body, el });
     });
 
-    // 滑鼠拖拽（不讓 wheel 影響頁面滾動，等會用捕獲攔掉）
-    const mouse = Mouse.create(zone); // 綁在 zone 上
+    // ---- 滑鼠拖拽 ----
+    const mouse = Mouse.create(zone);
     const mouseConstraint = MouseConstraint.create(engine, {
       mouse,
       constraint: { stiffness: 0.2, render: { visible: false } }
     });
     World.add(world, mouseConstraint);
 
-    // ***關鍵***：在捕獲階段攔掉 wheel/touchmove，只 stop，不 preventDefault
-    // 這樣事件不會傳到 Matter 的 wheel handler（它會 preventDefault），頁面就能正常捲動
+    // 捕獲階段攔掉 wheel/touchmove 傳進 Matter（保留頁面可捲）
     const stopMatterWheel = (e) => { e.stopImmediatePropagation(); };
-    zone.addEventListener('wheel',           stopMatterWheel, { capture: true, passive: true });
-    zone.addEventListener('mousewheel',      stopMatterWheel, { capture: true, passive: true });
-    zone.addEventListener('DOMMouseScroll',  stopMatterWheel, { capture: true, passive: true });
-    zone.addEventListener('touchmove',       stopMatterWheel, { capture: true, passive: true });
+    zone.addEventListener('wheel',          stopMatterWheel, { capture: true, passive: true });
+    zone.addEventListener('mousewheel',     stopMatterWheel, { capture: true, passive: true });
+    zone.addEventListener('DOMMouseScroll', stopMatterWheel, { capture: true, passive: true });
+    zone.addEventListener('touchmove',      stopMatterWheel, { capture: true, passive: true });
 
-    // 將剛體位置/角度同步到 DOM
-    Events.on(engine, 'afterUpdate', () => {
+    // ---- 同步剛體到 DOM ----
+    const onAfterUpdate = () => {
       for (const { body, el } of bodies) {
         const { x, y } = body.position;
         el.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${body.angle}rad)`;
-        el.style.position = 'absolute';
-        el.style.left = '0';
-        el.style.top  = '0';
-        el.style.willChange = 'transform';
       }
-    });
+    };
+    Events.on(engine, 'afterUpdate', onAfterUpdate);
 
-    // requestAnimationFrame 手動步進（比 Render.run 更省）
-    const step = (t) => {
+    // ---- 手動步進 ----
+    let rafId = null;
+    const step = () => {
       Engine.update(engine, 1000 / 60);
       rafId = requestAnimationFrame(step);
     };
     rafId = requestAnimationFrame(step);
 
-    // 視窗縮放：重建世界（最穩定）
+    // ---- RWD：重建 ----
     const onResize = debounce(() => rebuild(zone, list), 200);
     window.addEventListener('resize', onResize);
 
-    // 視窗/頁籤不可見 → 暫停；回來 → 繼續
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) pause();
-      else resume();
-    });
+    // ---- 頁籤可見性：暫停/恢復 ----
+    const onVisibility = () => { document.hidden ? pause() : resume(); };
+    document.addEventListener('visibilitychange', onVisibility);
 
-    // 進出視口：出視口就暫停、進視口就繼續
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.target !== zone) return;
-        if (e.isIntersecting) resume(); else pause();
-      });
-    }, { threshold: 0.01 });
-    io.observe(zone);
+    // 保存 context
+    zone.__fallchips = {
+      engine, world, bodies, mouse, mouseConstraint,
+      rafId, onAfterUpdate, onResize, onVisibility,
+      listeners: { stopMatterWheel }
+    };
 
-    // 保存到 zone，供重建/清理
-    zone.__fallchips = { engine, world, bodies, mouse, mouseConstraint, rafId, io, onResize, listeners: { stopMatterWheel } };
-
-    // 工具
-    function pause() {
-      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-    }
-    function resume() {
-      if (!rafId) rafId = requestAnimationFrame(step);
-    }
+    function pause() { if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
+    function resume(){ if (!rafId) rafId = requestAnimationFrame(step); }
   }
 
   function rebuild(zone, list) {
-    destroy(zone); // 先清理
-    started = false; // 允許重建
-    init(); // 重新初始化
+    destroy(zone, list);
+    started = false;
+    init();
   }
 
-  function destroy(zoneEl) {
+  function destroy(zoneEl, listEl) {
     const zone = zoneEl || document.querySelector(ZONE_SEL);
-    const ctx = zone && zone.__fallchips;
+    const list = listEl || document.querySelector(LIST_SEL);
+    const ctx  = zone && zone.__fallchips;
     if (!ctx || destroyed) return;
 
     destroyed = true;
 
-    // 解除事件
     window.removeEventListener('resize', ctx.onResize);
-    ctx.io && ctx.io.disconnect();
+    document.removeEventListener('visibilitychange', ctx.onVisibility);
 
     const { stopMatterWheel } = ctx.listeners || {};
     if (stopMatterWheel) {
-      zone.removeEventListener('wheel',           stopMatterWheel, { capture: true });
-      zone.removeEventListener('mousewheel',      stopMatterWheel, { capture: true });
-      zone.removeEventListener('DOMMouseScroll',  stopMatterWheel, { capture: true });
-      zone.removeEventListener('touchmove',       stopMatterWheel, { capture: true });
+      zone.removeEventListener('wheel',          stopMatterWheel, { capture: true });
+      zone.removeEventListener('mousewheel',     stopMatterWheel, { capture: true });
+      zone.removeEventListener('DOMMouseScroll', stopMatterWheel, { capture: true });
+      zone.removeEventListener('touchmove',      stopMatterWheel, { capture: true });
     }
 
-    // 停 raf
     if (ctx.rafId) cancelAnimationFrame(ctx.rafId);
+    try { Events.off(ctx.engine, 'afterUpdate', ctx.onAfterUpdate); } catch(_) {}
+    try { Composite.clear(ctx.engine.world, false); Engine.clear(ctx.engine); } catch(_) {}
 
-    // 清物理世界
-    try {
-      Composite.clear(ctx.engine.world, false);
-      Engine.clear(ctx.engine);
-    } catch (_) {}
+    // 清 DOM transform（避免殘影）
+    if (list) Array.from(list.children).forEach(el => { el.style.transform = ''; });
 
     zone.__fallchips = null;
     destroyed = false;
   }
 
-  // 小工具：防抖
   function debounce(fn, delay = 200) {
-    let timer = null;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn(...args), delay);
+    let t = null;
+    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+  }
+
+  // ===== 觸發：每次 .s-b-hahs 進入視窗 >=50% 就播放（若在播就略過） =====
+  const triggerEl = document.querySelector(TRIGGER_SEL);
+  const zoneEl    = document.querySelector(ZONE_SEL);
+  const listEl    = document.querySelector(LIST_SEL);
+  if (!triggerEl || !zoneEl || !listEl) return;
+
+  let inView = false;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.target !== triggerEl) return;
+      if (e.isIntersecting && !inView) {
+        inView = true;
+        if (!isPlaying) {
+          isPlaying = true;
+          rebuild(zoneEl, listEl);
+          // 播放結束時機：簡單起見給一個超時（也可改成監聽速度或靜止）
+          setTimeout(() => { isPlaying = false; }, 2000);
+        }
+      } else if (!e.isIntersecting && inView) {
+        inView = false;
+        // 離開視口就暫停 raf（省效能）
+        const ctx = zoneEl.__fallchips;
+        if (ctx && ctx.rafId) { cancelAnimationFrame(ctx.rafId); ctx.rafId = null; }
+      }
+    });
+  }, { threshold: IO_THRESHOLD });
+  io.observe(triggerEl);
+
+  // 初次不自動 init；由進視窗時觸發
+})();
+
+// 眨眼眼動
+(function () {
+  const hero = document.querySelector('#banner .hero');
+  const svg  = hero?.querySelector('.gogo-eyes');
+  if (!hero || !svg) return;
+
+  const eyeL = svg.querySelector('#eyeL');
+  const eyeR = svg.querySelector('#eyeR');
+  const pL   = svg.querySelector('#pL');
+  const pR   = svg.querySelector('#pR');
+  const lids = svg.querySelector('.lids');
+  const nose = svg.querySelector('#nose');
+
+  // 鼻子基準位置
+  let baseTx = 0, baseTy = 0, baseRest = "";
+  if (nose) {
+    const t = nose.getAttribute('transform') || "";
+    const m = t.match(/translate\(\s*([\-0-9.]+)[ ,]([\-0-9.]+)\s*\)/i);
+    if (m) { baseTx = parseFloat(m[1]); baseTy = parseFloat(m[2]); }
+    baseRest = t.replace(/translate\(\s*([\-0-9.]+)[ ,]([\-0-9.]+)\s*\)/i, "").trim();
+  }
+
+  // 參數
+  const SPRING_K = 0.1;
+  const DAMPING  = 0.65;
+  const RETURN_EASE = 0.1;
+  const NOSE_FOLLOW = 0.55;
+  const BLINK_MIN = 1800, BLINK_MAX = 4200;
+
+  // 幾何
+  const VB = svg.viewBox.baseVal;
+  const L = { cx:+eyeL.getAttribute('cx'), cy:+eyeL.getAttribute('cy'), r:+eyeL.getAttribute('r') };
+  const R = { cx:+eyeR.getAttribute('cx'), cy:+eyeR.getAttribute('cy'), r:+eyeR.getAttribute('r') };
+  const pupil = { rx:+pL.getAttribute('rx')||15, ry:+pR.getAttribute('ry')||20 };
+  const RAD_L = Math.max(0, L.r - Math.max(pupil.rx, pupil.ry)) * 2;
+  const RAD_R = Math.max(0, R.r - Math.max(pupil.rx, pupil.ry)) * 2;
+
+  // 座標
+  let box = svg.getBoundingClientRect();
+  new ResizeObserver(()=>{ box = svg.getBoundingClientRect(); }).observe(svg);
+
+  let px = box.left + box.width/2;
+  let py = box.top  + box.height/2;
+  let inside = false;
+
+  let targetL = {dx:0,dy:0}, curL = {dx:0,dy:0}, velL = {dx:0,dy:0};
+  let targetR = {dx:0,dy:0}, curR = {dx:0,dy:0}, velR = {dx:0,dy:0};
+  let curN = {dx:0,dy:0}, velN = {dx:0,dy:0};
+
+  const toVB = (x,y)=>({
+    x: ((x - box.left) / box.width ) * VB.width  + VB.x,
+    y: ((y - box.top  ) / box.height) * VB.height + VB.y
+  });
+
+  const clamp = (dx,dy,limit)=>{
+    const len = Math.hypot(dx,dy) || 1;
+    const k = Math.min(limit,len)/len;
+    return {dx:dx*k, dy:dy*k};
+  };
+
+  const spring = (cur, vel, tgt)=>{
+    const ax = SPRING_K * (tgt.dx - cur.dx);
+    const ay = SPRING_K * (tgt.dy - cur.dy);
+    vel.dx = vel.dx * DAMPING + ax;
+    vel.dy = vel.dy * DAMPING + ay;
+    cur.dx += vel.dx;
+    cur.dy += vel.dy;
+  };
+
+  function updateTargets(){
+    const {x,y} = toVB(px, py);
+    const l = clamp(x - L.cx, y - L.cy, RAD_L);
+    const r = clamp(x - R.cx, y - R.cy, RAD_R);
+
+    if (!inside) {
+      targetL.dx += (0 - targetL.dx) * RETURN_EASE;
+      targetL.dy += (0 - targetL.dy) * RETURN_EASE;
+      targetR.dx += (0 - targetR.dx) * RETURN_EASE;
+      targetR.dy += (0 - targetR.dy) * RETURN_EASE;
+    } else {
+      targetL = l; targetR = r;
+    }
+  }
+
+  function render(){
+    updateTargets();
+
+    // 瞳孔
+    spring(curL, velL, targetL);
+    spring(curR, velR, targetR);
+    pL.setAttribute('transform', `translate(${curL.dx},${curL.dy})`);
+    pR.setAttribute('transform', `translate(${curR.dx},${curR.dy})`);
+
+    // 鼻子
+    const noseTarget = {
+      dx: (curL.dx + curR.dx) * 0.5 * NOSE_FOLLOW,
+      dy: (curL.dy + curR.dy) * 0.5 * NOSE_FOLLOW
+    };
+    spring(curN, velN, noseTarget);
+    if (nose) {
+      const t = `translate(${(baseTx+curN.dx).toFixed(2)},${(baseTy+curN.dy).toFixed(2)})${baseRest?' '+baseRest:''}`;
+      nose.setAttribute('transform', t);
+    }
+
+    requestAnimationFrame(render);
+  }
+
+  // 滑鼠 + 觸控事件
+  const move = (x,y)=>{ px=x; py=y; };
+  hero.addEventListener('mousemove', e=>{ inside=true; move(e.clientX, e.clientY); });
+  hero.addEventListener('mouseenter', ()=>{ inside=true; });
+  hero.addEventListener('mouseleave', ()=>{ inside=false; });
+  hero.addEventListener('touchstart', e=>{ if(e.touches[0]){ inside=true; move(e.touches[0].clientX,e.touches[0].clientY);} }, {passive:true});
+  hero.addEventListener('touchmove', e=>{ if(e.touches[0]) move(e.touches[0].clientX,e.touches[0].clientY); }, {passive:true});
+  hero.addEventListener('touchend', ()=>{ inside=false; });
+
+  
+
+  requestAnimationFrame(render);
+})();
+
+
+// 爪印
+(() => {
+  const cursor = document.getElementById("custom-cursor");
+  if (!cursor) return;
+
+  // 三張爪印 PNG
+  const PAWS = ["images/paw-1.png", "images/paw-2.png", "images/paw-3.png"];
+
+  // 參數
+  const PRINT_SIZE   = 32;     // 爪印尺寸
+  const ROTATE_RANGE = 18;     // 隨機旋轉 ±度數
+  const RANDOM_MODE  = true;   // true=隨機，false=循環
+  const MAX_PAWS     = 10;     // 同時最多存在數量（0 = 不限制）
+  const PRINT_ALPHA  = 0.8;    // 爪印透明度 0~1
+  const BLOCK_SEL    = "[data-no-paw]"; // 加在不想掉印的區塊上
+
+  let idx = 0;
+  const paws = [];
+
+  // 判斷點擊目標是否在禁用區塊內
+  const isBlocked = (el) => !!el && el.closest(BLOCK_SEL);
+
+  // 游標跟著移動（純視覺）
+  document.addEventListener("mousemove", (e) => {
+    cursor.style.left = e.clientX + "px";
+    cursor.style.top  = e.clientY + "px";
+  });
+
+  // 掉一枚爪印（用 page 座標，定位在整個文件頁面）
+  function dropPawAtPage(xPage, yPage) {
+    const src = RANDOM_MODE
+      ? PAWS[Math.floor(Math.random() * PAWS.length)]
+      : PAWS[(idx++ % PAWS.length)];
+
+    const img = document.createElement("img");
+    img.className = "paw";
+    img.src = src;
+    img.alt = "";
+    img.width = img.height = PRINT_SIZE;
+
+    // 位置：整個頁面（非視窗）
+    img.style.position = "absolute";
+    img.style.left = xPage + "px";
+    img.style.top  = yPage + "px";
+    img.style.opacity = String(PRINT_ALPHA);
+    img.style.pointerEvents = "none";
+    img.style.zIndex = "9999";
+
+    // 隨機旋轉
+    const rot = (Math.random() * 2 - 1) * ROTATE_RANGE;
+    img.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`;
+
+    document.body.appendChild(img);
+    paws.push(img);
+
+    // 數量限制：超過就移除最舊的
+    if (MAX_PAWS > 0 && paws.length > MAX_PAWS) {
+      const oldest = paws.shift();
+      oldest.remove();
+    }
+  }
+
+  // 滑鼠點一下：若在禁用區塊就略過
+  document.addEventListener("mousedown", (e) => {
+    if (isBlocked(e.target)) return;
+    cursor.classList.add("active");
+    dropPawAtPage(e.pageX, e.pageY);
+  });
+  document.addEventListener("mouseup", () => {
+    cursor.classList.remove("active");
+  });
+
+  // 觸控：用 elementFromPoint 檢查當下點位是否在禁用區塊
+  document.addEventListener("touchstart", (e) => {
+    const t = e.touches[0];
+    if (!t) return;
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    if (isBlocked(el)) return;
+    dropPawAtPage(t.pageX, t.pageY);
+  }, { passive: true });
+})();
+
+// 標題字
+(function ($) {
+  // ===== 節奏/參數（可調） =====
+  const UP_MS   = 110;
+  const DOWN_MS = 180;
+  const GAP_MS  = 70;
+  const ARC_H   = 44;
+  const GAP_X   = 6;
+  const GAP_Y   = 10;
+
+  // 觸發設定
+  const TITLE_SELECTOR = '#petmap-title'; // 你的 h1
+  const HERO_SELECTOR  = '.hero';         // 觸發區塊
+  const IO_THRESHOLD   = 0.5;             // 進可視比例
+  const IO_ROOTMARGIN  = '0px 0px -10% 0px';
+
+  let isPlaying = false;
+
+  function getBeforeMetrics(h1){
+    const cs = getComputedStyle(h1, '::before');
+    return {
+      ballW:    parseFloat(cs.getPropertyValue('width')) || 0,
+      baseLeft: parseFloat(cs.getPropertyValue('left'))  || 0,
+      baseTop:  parseFloat(cs.getPropertyValue('top'))   || 0,
     };
   }
 
-  // 只在 fallzone 真的進入視口時才啟動，避免初載負擔
-  const zoneEl = document.querySelector(ZONE_SEL);
-  if (!zoneEl) return;
-
-  const onceIO = new IntersectionObserver((entries, io) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        init();
-        io.disconnect();
-      }
+  function tokenizeToSpans($title){
+    const text = $title.text();
+    const chars = Array.from(text);
+    $title.empty();
+    const frag = $(document.createDocumentFragment());
+    chars.forEach(ch=>{
+      if (/\s/.test(ch)) frag.append('<span class="sp">&nbsp;</span>');
+      else frag.append($('<span class="ch"></span>').text(ch));
     });
-  }, { threshold: 0.01 });
-  onceIO.observe(zoneEl);
-})();
+    $title.append(frag);
+  }
+
+  function moveBallTo(h1,x,y,dur,ease){
+    h1.style.setProperty('--ball-dur',  (dur|0)+'ms');
+    h1.style.setProperty('--ball-ease', ease);
+    h1.style.setProperty('--ball-x',    x+'px');
+    h1.style.setProperty('--ball-y',    y+'px');
+  }
+
+  function targetForChar(h1,$char,metrics){
+    const pos = $char.position();
+    const w   = $char.outerWidth();
+    const leftCenter = pos.left + (w - metrics.ballW)/2 + GAP_X;
+    const topBase    = pos.top - GAP_Y;
+    return { tx: leftCenter - metrics.baseLeft, ty: topBase - metrics.baseTop };
+  }
+
+  function hopBetween(h1, ta, tb, onLanded){
+    const midX = (ta.tx + tb.tx) / 2;
+    const midY = Math.min(ta.ty, tb.ty) - ARC_H;
+    moveBallTo(h1, midX, midY, UP_MS,   'cubic-bezier(.25,.1,.25,1)');
+    setTimeout(()=>{
+      moveBallTo(h1, tb.tx, tb.ty, DOWN_MS, 'cubic-bezier(.25,.1,.25,1)');
+      setTimeout(onLanded, DOWN_MS);
+    }, UP_MS);
+  }
+
+  function bounceInPlace(h1, t, $char, cb){
+    const upH   = ARC_H * 0.6;
+    const upDur = 100, downDur = 150;
+    moveBallTo(h1, t.tx, t.ty - upH, upDur, 'cubic-bezier(.25,.1,.25,1)');
+    setTimeout(()=>{
+      moveBallTo(h1, t.tx, t.ty, downDur, 'cubic-bezier(.25,.1,.25,1)');
+      setTimeout(()=>{
+        $char.removeClass('lit');   // 落地時還原最後一字
+        setTimeout(cb, GAP_MS);
+      }, downDur);
+    }, upDur);
+  }
+
+  function ensureBallHitArea($title){
+    const h1 = $title[0];
+    const metrics = getBeforeMetrics(h1);
+    let $hit = $title.find('.ball-hit');
+    if (!$hit.length){
+      $hit = $('<button type="button" class="ball-hit" aria-label="replay"></button>')
+        .css({
+          position: 'absolute',
+          background: 'transparent',
+          border: '0',
+          padding: 0,
+          margin: 0,
+          cursor: 'pointer',
+          zIndex: 2
+        })
+        .appendTo($title);
+
+      $hit.on('click', function(e){
+        e.preventDefault();
+        if (isPlaying) return;
+        replay($title);
+      });
+    }
+    $hit.css({
+      left: metrics.baseLeft + 'px',
+      top:  metrics.baseTop  + 'px',
+      width:  metrics.ballW + 'px',
+      height: metrics.ballW + 'px'
+    });
+  }
+
+  function play($title, onDone){
+    isPlaying = true;
+    tokenizeToSpans($title);
+    ensureBallHitArea($title);
+
+    const h1 = $title[0];
+    const $chars = $title.find('.ch');
+    if (!$chars.length){ isPlaying = false; onDone && onDone(); return; }
+
+    let metrics = getBeforeMetrics(h1);
+    let t0 = targetForChar(h1, $chars.eq(0), metrics);
+    moveBallTo(h1, t0.tx, t0.ty, 0, 'linear');
+    $chars.eq(0).addClass('lit');
+
+    let i = 1;
+    (function forward(){
+      if (i < $chars.length){
+        metrics = getBeforeMetrics(h1);
+        const ta = targetForChar(h1, $chars.eq(i-1), metrics);
+        const tb = targetForChar(h1, $chars.eq(i),   metrics);
+        hopBetween(h1, ta, tb, ()=>{
+          $chars.eq(i).addClass('lit');
+          setTimeout(()=>{ i++; forward(); }, GAP_MS);
+        });
+      } else {
+        metrics = getBeforeMetrics(h1);
+        const lastIdx = $chars.length - 1;
+        const tLast = targetForChar(h1, $chars.eq(lastIdx), metrics);
+        bounceInPlace(h1, tLast, $chars.eq(lastIdx), () => { backward(); });
+      }
+    })();
+
+    function backward(){
+      let j = $chars.length - 1;
+      (function step(){
+        if (j > 0){
+          metrics = getBeforeMetrics(h1);
+          const ta = targetForChar(h1, $chars.eq(j),   metrics);
+          const tb = targetForChar(h1, $chars.eq(j-1), metrics);
+          hopBetween(h1, ta, tb, ()=>{
+            $chars.eq(j-1).removeClass('lit');
+            setTimeout(()=>{ j--; step(); }, GAP_MS);
+          });
+        } else {
+          $chars.eq(0).removeClass('lit');
+          metrics = getBeforeMetrics(h1);
+          const tFirst = targetForChar(h1, $chars.eq(0), metrics);
+          const midX   = (tFirst.tx + 0) / 2;
+          const midY   = Math.min(tFirst.ty, 0) - ARC_H;
+
+          moveBallTo(h1, midX, midY, UP_MS, 'cubic-bezier(.25,.1,.25,1)');
+          setTimeout(()=>{
+            moveBallTo(h1, 0, 0, DOWN_MS, 'cubic-bezier(.25,.1,.25,1)');
+            setTimeout(()=>{
+              const plain = $title.text();
+              $title.text(plain);
+              ensureBallHitArea($title);
+              isPlaying = false;
+              onDone && onDone();
+            }, DOWN_MS);
+          }, UP_MS);
+        }
+      })();
+    }
+  }
+
+  function replay($title){
+    $title.text($title.text());
+    ensureBallHitArea($title);
+    play($title);
+  }
+
+  $(function(){
+    const $title = $(TITLE_SELECTOR);
+    const $hero  = $(HERO_SELECTOR);
+
+    ensureBallHitArea($title);
+
+    // 每次 .hero 進到視窗（>= threshold）就播放（若正在播則略過）
+    if ($hero.length){
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(entry=>{
+          if (entry.isIntersecting && !isPlaying){
+            play($title);
+          }
+        });
+      }, { root: null, threshold: IO_THRESHOLD, rootMargin: IO_ROOTMARGIN });
+      io.observe($hero[0]);
+    }
+
+    // RWD：視窗尺寸變更只更新熱區位置
+    let raf;
+    $(window).on('resize', ()=>{
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(()=> ensureBallHitArea($title));
+    });
+  });
+})(jQuery);

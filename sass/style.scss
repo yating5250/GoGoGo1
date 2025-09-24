@@ -498,6 +498,188 @@ header {
 
 }
 
+// #banner {
+//     width: 100%;
+//     height: 165vh;
+//     background-image: url("../images/banner-bg.svg");
+//     background-repeat: no-repeat;
+//     background-position: center;
+//     background-size: cover;
+//     display: flex;
+//     flex-direction: column;
+//     align-items: center;
+
+//     @media ($mediamd) {
+//         height: auto;
+//     }
+
+//     .hero {
+//         position: relative;
+//         width: 100%;
+//         height: 100vh;
+//         display: flex;
+//         flex-direction: column;
+//         justify-content: flex-end;
+//         align-items: center;
+//         gap: 20px;
+//         padding: 0px 50px 0 50px;
+//         margin-top: 70px;
+
+//         @media ($mediaxl) {
+//             gap: 35px;
+//         }
+
+//         @media ($medialg) {
+//             gap: 150px;
+//         }
+
+
+//         @media ($mediamd) {
+//             gap: 40px;
+//             justify-content: flex-start;
+//             padding: 40px 50px 0 50px;
+//         }
+
+
+
+
+
+//         .title {
+//             width: 100%;
+//             display: flex;
+//             flex-direction: column;
+//             justify-content: flex-start;
+//             align-items: center;
+//             // margin-top: 150px;
+//             gap: $space-lg;
+
+//             @media ($mediamd) {
+//                 width: 60%;
+//                 transform: translateX(8px);
+//             }
+
+//             h1 {
+//                 color: $text;
+//                 font-family: $family-tc;
+//                 font-size: $f-s-64;
+//                 font-style: normal;
+//                 font-weight: 900;
+//                 line-height: normal;
+//                 letter-spacing: 12.8px;
+//                 position: relative;
+
+//                 white-space: nowrap;
+
+//                 @media ($mediamd) {
+//                     font-size: $f-s-48;
+//                 }
+
+//                 &::before {
+//                     content: "";
+//                     position: absolute;
+//                     top: 5px;
+//                     left: -50px;
+//                     background-color: $primary3;
+//                     width: 29px;
+//                     height: 29px;
+//                     border-radius: 999px;
+
+//                     @media ($mediamd) {
+//                         width: 20px;
+//                         height: 20px;
+//                         left: -25px;
+//                     }
+
+//                 }
+
+//                 &::after {
+//                     content: "";
+//                     position: absolute;
+//                     bottom: -5px;
+//                     right: -25px;
+//                     width: 29px;
+//                     height: 29px;
+//                     border-radius: 999px;
+//                     background-color: $primary1;
+
+//                     @media ($mediamd) {
+//                         width: 20px;
+//                         height: 20px;
+//                         right: -15px;
+
+
+//                     }
+//                 }
+//             }
+
+//             h2 {
+//                 color: $White;
+//                 font-family: $family-tc;
+//                 font-size: $f-s-40;
+//                 font-style: normal;
+//                 font-weight: 700;
+//                 line-height: normal;
+//                 letter-spacing: $space-xxs;
+
+//                 @media ($mediamd) {
+//                     font-size: $f-s-32;
+//                 }
+
+//                 span {
+//                     color: $primary2;
+//                     font-size: $f-s-48;
+//                     font-style: normal;
+//                     font-weight: 700;
+//                     line-height: normal;
+//                     letter-spacing: $space-xxs;
+
+//                     @media ($mediamd) {
+//                         font-size: $f-s-40;
+//                     }
+
+//                     &:nth-child(2) {
+//                         color: $primary1;
+//                     }
+
+//                     &:nth-child(3) {
+//                         color: $primary3;
+//                     }
+//                 }
+//             }
+//         }
+
+//         figure {
+//             width: 623px;
+
+//             @media ($mediaxl) {
+//                 width: 100%;
+//             }
+
+//             img {
+//                 display: block;
+//                 width: 100%;
+//                 height: auto;
+
+
+//                 @media ($mediaxl) {
+//                     width: 70%;
+//                     // margin-left: 15%;
+//                 }
+
+//                 @media ($mediamd) {
+//                     width: 100%;
+//                     margin-left: 0px;
+//                 }
+//             }
+
+
+//         }
+
+
+
+//     }
+// }
+/* 眼皮動畫只針對 <rect class="lid">，不要套在 <g> */
 #banner {
     width: 100%;
     height: 165vh;
@@ -533,16 +715,11 @@ header {
             gap: 150px;
         }
 
-
         @media ($mediamd) {
             gap: 40px;
             justify-content: flex-start;
             padding: 40px 50px 0 50px;
         }
-
-
-
-
 
         .title {
             width: 100%;
@@ -550,7 +727,6 @@ header {
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            // margin-top: 150px;
             gap: $space-lg;
 
             @media ($mediamd) {
@@ -567,7 +743,6 @@ header {
                 line-height: normal;
                 letter-spacing: 12.8px;
                 position: relative;
-
                 white-space: nowrap;
 
                 @media ($mediamd) {
@@ -584,12 +759,16 @@ header {
                     height: 29px;
                     border-radius: 999px;
 
+                    /* 🔑 用 transform 做動畫 */
+                    transform: translate(var(--ball-x, 0), var(--ball-y, 0));
+                    transition: transform var(--ball-dur, .18s) var(--ball-ease, cubic-bezier(.25, .1, .25, 1));
+
+
                     @media ($mediamd) {
                         width: 20px;
                         height: 20px;
                         left: -25px;
                     }
-
                 }
 
                 &::after {
@@ -606,10 +785,15 @@ header {
                         width: 20px;
                         height: 20px;
                         right: -15px;
-
-
                     }
                 }
+
+                /* 當球落到字上時，JS 會加 lit 在該字 */
+                .ch.lit {
+                    color: $primary3;
+                }
+
+                // 讓字變成球的顏色
             }
 
             h2 {
@@ -628,9 +812,7 @@ header {
                 span {
                     color: $primary2;
                     font-size: $f-s-48;
-                    font-style: normal;
                     font-weight: 700;
-                    line-height: normal;
                     letter-spacing: $space-xxs;
 
                     @media ($mediamd) {
@@ -660,7 +842,6 @@ header {
                 width: 100%;
                 height: auto;
 
-
                 @media ($mediaxl) {
                     width: 70%;
                     margin-left: 15%;
@@ -668,18 +849,81 @@ header {
 
                 @media ($mediamd) {
                     width: 100%;
-                    margin-left: 0px;
+                    margin-left: 0;
                 }
             }
+        }
+    }
+}
 
+/* =============================
+ * 疊層 SVG（眼睛＋鼻子）
+ * ============================= */
+#banner .hero figure {
+    position: relative;
 
+    .gogo-eyes {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+        /* 不擋滑鼠/觸控 */
+
+        /* ── 眼皮（rect + clipPath，從上往下蓋） ── */
+        .lids .lid {
+            /* 只用 translateY，避免 scale 造成白圈 */
+            transform: translateY(100%);
+            /* 平時放在上方，不蓋眼白 */
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+
+        // /* 眨眼動畫：上→下蓋滿→回上（自然節奏） */
+        // @keyframes blinkSlideDown {
+        //   0%   { transform: translateY(100%); }
+        //   35%  { transform: translateY(-1); }
+        //   60%  { transform: translateY(-1); }
+        //   100% { transform: translateY(100%); }
+        // }
+        .lids.blinking .lid {
+            animation: blinkSlideDown 0.16s cubic-bezier(.3, 0, .2, 1) 1 both;
+        }
+
+        /* ── transform 常動到的元素，給效能提示 ── */
+        #pL,
+        #pR,
+        #nose {
+            will-change: transform;
         }
 
 
 
+        /* 偵錯：顯示眼白邊界（不隨縮放變粗） */
+        &.debug {
+
+            #eyeL,
+            #eyeR {
+                stroke: rgba(0, 0, 0, .25);
+                stroke-width: 2;
+                vector-effect: non-scaling-stroke;
+            }
+        }
     }
 }
 
+/* =============================
+ * 無障礙：減少動效時關閉眨眼
+ * ============================= */
+@media (prefers-reduced-motion: reduce) {
+    #banner .hero figure .gogo-eyes .lids .lid {
+        animation: none !important;
+        transform: translateY(-100%) !important;
+    }
+}
+
+// 關於
 #about {
     width: 100%;
     // height: 65vh;
@@ -1284,16 +1528,17 @@ header {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-       
+        padding: 0 50px;
+
 
         figure {
             width: 100%;
             display: flex;
             margin-top: -80px;
-            padding-left: 200px;
+            padding-left: 150px;
             margin-bottom: -40px;
-             z-index: 10;
-            
+            z-index: 10;
+
 
             @media ($mediamd) {
                 margin-top: 0px;
@@ -1465,9 +1710,9 @@ header {
 
         .fallzone {
             position: relative;
-           width: 100%;
-           padding: 0 50px;
-        overflow: hidden;
+            width: 100%;
+            // padding: 0 50px;
+            overflow: hidden;
             z-index: 5;
             background: #FFF8E6; // 只是示意，看得到範圍，想換就換
             // margin-top: -300px;
@@ -1481,7 +1726,7 @@ header {
             display: block !important; // 重要：避免被 ul { display:flex } 汙染
             position: relative;
             height: 100%;
-             height: 300px; // 想更高/更低就改這裡
+            height: 300px; // 想更高/更低就改這裡
             width: 100%;
             margin: 0 !important;
             padding: 0 !important;
@@ -1590,7 +1835,7 @@ header {
         }
 
         @media ($medialg) {
-           
+
 
             .fallzone .chips>li {
                 padding: 8px 16px;
@@ -1606,7 +1851,7 @@ header {
         }
 
         @media ($mediamd) {
-         
+
 
             .fallzone .chips>li {
                 padding: 8px 14px;
@@ -1943,3 +2188,154 @@ footer {
     }
 }
 
+body {
+    cursor: none; // 隱藏系統游標
+}
+
+/* 啟用自訂游標時加在 <body> 的 class */
+body.use-custom-cursor {
+    cursor: none !important;
+}
+
+/* 把整頁所有元素的系統游標都隱藏（含 link/btn） */
+body.use-custom-cursor :where(*) {
+    cursor: none !important;
+}
+
+/* 自訂游標本體 */
+#custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 32px;
+    /* 想多大改這裡 */
+    height: 32px;
+    pointer-events: none;
+    /* 不擋點擊/hover */
+    transform: translate(-50%, -50%) scale(1);
+    transition: transform .15s cubic-bezier(.3, 1.5, .5, 1);
+    z-index: 999999;
+    /* 蓋在最上層 */
+}
+
+#custom-cursor svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* 按下去縮小 */
+#custom-cursor.active {
+    transform: translate(-50%, -50%) scale(0.82);
+}
+
+/* 只在可用精細指標（滑鼠）時啟用；觸控裝置自動還原 */
+@media (pointer: coarse) {
+
+    body.use-custom-cursor,
+    body.use-custom-cursor :where(*) {
+        cursor: auto !important;
+    }
+
+    #custom-cursor {
+        display: none;
+    }
+}
+
+
+
+// /* 全頁爪印畫布：固定在視窗上，不佔版面、不擋點擊 */
+// canvas.paw-layer{
+//   position: fixed;
+//   inset: 0;                 /* top/right/bottom/left: 0 */
+//   width: 100vw !important;
+//   height: 100vh !important;
+//   pointer-events: none;     /* 點擊可穿透到底下 */
+//   z-index: 9999;            /* 疊在最上層 */
+//   display: block;
+// }
+
+// /* 隱藏系統游標 */
+// html, body { cursor: none; }
+
+// /* 共同：用 paw.png 當遮罩，顏色用 background-color 決定 */
+// .paw,
+// #custom-cursor{
+//   position: fixed;
+//   left: 0; top: 0;
+//   width: 32px; height: 32px;       /* 你的 paw.png 基本尺寸 */
+//   transform: translate(-50%,-50%);
+//   pointer-events: none;
+//   z-index: 10000;
+//   background-color: currentColor;   /* 用 color 來控制顏色 */
+//   /* Mask（Chrome/Safari 用 -webkit- 前綴；Firefox 用標準語法） */
+//   -webkit-mask: url("images/paw.png") center/contain no-repeat;
+//           mask: url("images/paw.png") center/contain no-repeat;
+//   will-change: transform, opacity;
+// }
+
+// /* 追蹤爪印效果 */
+// .paw{
+//   z-index: 9999;
+//   opacity: 1;
+//   transition: opacity .8s linear, transform .8s ease-out;
+// }
+
+// /* 點擊時有按壓手感 */
+// #custom-cursor {
+//   transition: transform .12s ease;
+// }
+
+
+/* 隱藏系統游標（桌面） */
+html,
+body {
+    cursor: none;
+}
+
+/* 自訂游標：固定在視窗上、跟滑鼠走 */
+#custom-cursor {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 32px;
+    height: 32px;
+    /* 想改大小改這裡 */
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: none;
+    z-index: 10000;
+    transition: transform .15s cubic-bezier(.3, 1.5, .5, 1);
+}
+
+#custom-cursor.active {
+    transform: translate(-50%, -50%) scale(.82);
+}
+
+/* 單一爪印（插在 body，跟著頁面內容捲動） */
+.paw {
+    position: absolute;
+    /* 關鍵：absolute + page 座標 */
+    left: 0;
+    top: 0;
+    width: 32px;
+    height: 32px;
+    /* 爪印圖尺寸（建議 32x32 PNG） */
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    user-select: none;
+    z-index: 9999;
+    opacity: 0.8;
+}
+
+/* 觸控裝置：還原系統游標、隱藏自訂游標 */
+@media (pointer: coarse) {
+
+    html,
+    body {
+        cursor: auto;
+    }
+
+    #custom-cursor {
+        display: none;
+    }
+}
