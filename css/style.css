@@ -832,7 +832,7 @@ header ul li:nth-child(4) a {
 }
 @media (max-width:1080px) {
   #about .about-box {
-    padding: 0px 50px 0 0px;
+    padding: 0px 0px 0 0px;
     flex-wrap: wrap;
     justify-content: space-evenly;
   }
@@ -1414,6 +1414,12 @@ header ul li:nth-child(4) a {
   z-index: 10;
   /* 使用者偏好減少動畫 */
 }
+@media (max-width:1080px) {
+  #stay .s-b-hahs figure {
+    padding-left: 0px;
+    margin-top: 0px;
+  }
+}
 @media (max-width:750px) {
   #stay .s-b-hahs figure {
     margin-top: 0px;
@@ -1678,6 +1684,7 @@ header ul li:nth-child(4) a {
   margin-bottom: -20px;
   right: 40%;
   cursor: pointer;
+  margin-top: -100px;
   /* 文字泡泡 */
   /* 滑鼠或鍵盤聚焦時顯示 */
   /* 新增：頭（點頭） */
@@ -1894,6 +1901,7 @@ header ul li:nth-child(4) a {
 #play .all-button {
   background-color: #FAE24C;
   color: #1F0C01;
+  z-index: 5;
 }
 #play .all-button svg {
   fill: #1F0C01;

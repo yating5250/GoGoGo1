@@ -987,7 +987,7 @@ header {
         }
 
         @media ($mediaxl) {
-            padding: 0px 50px 0 0px;
+            padding: 0px 0px 0 0px;
             flex-wrap: wrap;
             justify-content: space-evenly;
 
@@ -1753,6 +1753,13 @@ header {
             margin-bottom: -40px;
             z-index: 10;
 
+              @media ($mediaxl) {
+            
+                padding-left: 0px;
+                 margin-top: 0px;
+               
+            }
+
 
             @media ($mediamd) {
                 margin-top: 0px;
@@ -2223,6 +2230,7 @@ header {
         margin-bottom: -20px;
         right: 40%;
         cursor: pointer;
+        margin-top: -100px;
 
         /* 文字泡泡 */
         &::after {
@@ -2478,12 +2486,13 @@ header {
 
         }
 
-
     }
+
 
     .all-button {
         background-color: $primary3;
         color: $text;
+        z-index: 5;
 
         svg {
             fill: $text;
@@ -2613,50 +2622,6 @@ body.use-custom-cursor :where(*) {
         display: none;
     }
 }
-
-
-
-// /* 全頁爪印畫布：固定在視窗上，不佔版面、不擋點擊 */
-// canvas.paw-layer{
-//   position: fixed;
-//   inset: 0;                 /* top/right/bottom/left: 0 */
-//   width: 100vw !important;
-//   height: 100vh !important;
-//   pointer-events: none;     /* 點擊可穿透到底下 */
-//   z-index: 9999;            /* 疊在最上層 */
-//   display: block;
-// }
-
-// /* 隱藏系統游標 */
-// html, body { cursor: none; }
-
-// /* 共同：用 paw.png 當遮罩，顏色用 background-color 決定 */
-// .paw,
-// #custom-cursor{
-//   position: fixed;
-//   left: 0; top: 0;
-//   width: 32px; height: 32px;       /* 你的 paw.png 基本尺寸 */
-//   transform: translate(-50%,-50%);
-//   pointer-events: none;
-//   z-index: 10000;
-//   background-color: currentColor;   /* 用 color 來控制顏色 */
-//   /* Mask（Chrome/Safari 用 -webkit- 前綴；Firefox 用標準語法） */
-//   -webkit-mask: url("images/paw.png") center/contain no-repeat;
-//           mask: url("images/paw.png") center/contain no-repeat;
-//   will-change: transform, opacity;
-// }
-
-// /* 追蹤爪印效果 */
-// .paw{
-//   z-index: 9999;
-//   opacity: 1;
-//   transition: opacity .8s linear, transform .8s ease-out;
-// }
-
-// /* 點擊時有按壓手感 */
-// #custom-cursor {
-//   transition: transform .12s ease;
-// }
 
 
 /* 隱藏系統游標（桌面） */

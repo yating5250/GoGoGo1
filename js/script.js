@@ -824,7 +824,7 @@ $(function () {
 // smoove
 // 共用
 $('.smoove').smoove({
-  offset: '20%'
+  offset: '15%'
 });
 
 // 遠近載入
