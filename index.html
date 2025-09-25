@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
   <title>gogogo</title>
- <link rel="icon" href="/favicon.ico?v=2" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico?v=2" type="image/x-icon">
   <link rel="stylesheet" href="./css/style.min.css">
 </head>
 
@@ -32,13 +32,13 @@
   </div>
   <header>
     <div class="logo">
-      <h2>GOGOGO</h2>
+      <h2><a href="#">GOGOGO</a></h2>
     </div>
     <nav>
       <ul>
-        <li><a href="#">餐廳</a></li>
-        <li><a href="#">住宿</a></li>
-        <li><a href="#">活動</a></li>
+        <li><a href="#eat">餐廳</a></li>
+        <li><a href="#stay">住宿</a></li>
+        <li><a href="#play">活動</a></li>
         <li><a href="#">登入</a></li>
       </ul>
     </nav>
@@ -98,20 +98,20 @@
     </section>
 
     <section id="about">
-      <div class="about-title">
+      <div class="about-title smoove">
         <h2>關於我們</h2>
         <h3>ABOUT ME</h3>
       </div>
-      <div class="about-box">
-        <article class="circle">
+      <div class="about-box ">
+        <article class="circle smoove" data-move-x="-500px" data-rotate="90deg">
           <figure class="icon-1"><img src="./images/icon-1.svg" alt=""></figure>
-          <div class="about-content">
+          <div class="about-content ">
             <h4>一站式查詢</h4>
             <p>餐廳、住宿、活動資訊 <br>集中快速又方便</p>
           </div>
         </article>
 
-        <article class="square">
+        <article class="square smoove" data-move-x="-250px" data-rotate="45deg" data-move-y="150px">
           <figure class="icon-1"><img src="./images/icon-2.svg" alt=""></figure>
           <div class="about-content">
             <h4>專屬寵物族群</h4>
@@ -120,7 +120,7 @@
           </div>
         </article>
 
-        <article class="triangle">
+        <article class="triangle smoove" data-move-x="500px" data-rotate="-90deg">
           <div class="t-box">
             <figure class="icon-1"><img src="./images/icon-3.svg" alt=""></figure>
             <div class="about-content">
@@ -133,7 +133,7 @@
       </div>
     </section>
     <section id="eat">
-      <div class="all-title">
+      <div class="all-title smoove">
         <div class="slogan">
           <h2>立刻帶毛孩一起出發吧！</h2>
           <svg xmlns="http://www.w3.org/2000/svg" width="27" height="24" viewBox="0 0 27 24" fill="none">
@@ -147,7 +147,16 @@
             <h6>eat</h6>
           </div>
         </div>
-        <figure><img src="./images/eatdog.svg" alt=""><img src="./images/dogbowl.svg" alt=""></figure>
+        <figure class="feed">
+          <div class="dog">
+
+            <img class="dog-tail" src="./images/eat-dog-tail.svg" alt="">
+            <img class="dog-paw" src="./images/eat-dog-hand.svg" alt="">
+            <img class="dog-body" src="./images/eat-dog-body.svg" alt="">
+          </div>
+          <img class="bowl" src="./images/dogbowl.svg" alt="">
+        </figure>
+
       </div>
       <div class="choicebox">
         <div class="line"></div>
@@ -180,12 +189,12 @@
         <div class="line"></div>
       </div>
       <div class="cards-shell">
-        <div class="left" data-no-paw></div>
+        <div class="left smoove" data-no-paw></div>
         <div class="cards-viewport">
           <div class="cards-all">
 
             <article class="cards">
-              <div class="card " data-no-paw>
+              <div class="card smoove" data-no-paw data-move-x="-300px" data-rotate="90deg">
                 <div class="pic img-1" style="--bg:url('../images/eat-taiwan-1.jpg')">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -235,7 +244,7 @@
                   </div>
                 </article>
               </div>
-              <div class="card " data-no-paw>
+              <div class="card smoove" data-no-paw data-move-x="-150px" data-rotate="45deg">
                 <div class="pic img-2">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -285,7 +294,7 @@
                   </div>
                 </article>
               </div>
-              <div class="card " data-no-paw>
+              <div class="card smoove" data-no-paw data-move-x="150px" data-rotate="-45deg">
                 <div class="pic img-3">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -335,7 +344,7 @@
                   </div>
                 </article>
               </div>
-              <div class="card" data-no-paw>
+              <div class="card smoove" data-no-paw data-move-x="300px" data-rotate="-90deg">
                 <div class="pic img-4">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -388,7 +397,7 @@
             </article>
           </div>
         </div>
-        <div class="right" data-no-paw></div>
+        <div class="right smoove" data-no-paw></div>
       </div>
       <a href="#" class="all-button" data-no-paw>
         <svg width="24" height="24" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -407,7 +416,7 @@
       <div class="b-line"></div>
     </section>
     <section id="stay">
-      <div class="all-title">
+      <div class="all-title smoove">
         <div class="slogan">
           <h2>旅途上，也有牠的位置</h2>
           <svg xmlns="http://www.w3.org/2000/svg" width="27" height="24" viewBox="0 0 27 24" fill="none">
@@ -421,7 +430,13 @@
             <h6>stay</h6>
           </div>
         </div>
-        <figure><img src="./images/doghouse.svg" alt=""><img src="./images/liedog.svg" alt=""></figure>
+        <figure class="staydog"><img class="doghouse" src="./images/doghouse.svg" alt="">
+          <figure class="liedog">
+            <img class="dog-body" src="./images/liedognobody.svg" alt="">
+            <img class="dog-head" src="./images/liedoghead.svg" alt="">
+            <img class="dog-tail" src="./images/liedogtail.svg" alt="">
+          </figure>
+        </figure>
       </div>
       <div class="choicebox">
         <div class="line"></div>
@@ -462,7 +477,7 @@
           <div class="cards-all">
 
             <article class="cards">
-              <div class="card" data-no-paw>
+              <div class="card smoove" data-no-paw data-move-x="-300px" data-rotate="90deg">
                 <div class="pic img-1">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -512,7 +527,7 @@
                   </div>
                 </article>
               </div>
-              <div class="card" data-no-paw>
+              <div class="card smoove" data-no-paw data-move-x="-150px" data-rotate="45deg">
                 <div class="pic img-2">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -562,7 +577,7 @@
                   </div>
                 </article>
               </div>
-              <div class="card" data-no-paw>
+              <div class="card smoove" data-no-paw data-move-x="150px" data-rotate="-45deg">
                 <div class="pic img-3">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -612,7 +627,7 @@
                   </div>
                 </article>
               </div>
-              <div class="card" data-no-paw>
+              <div class="card smoove" data-no-paw data-move-x="300px" data-rotate="-90deg">
                 <div class="pic img-4">
                   <div class="score">
                     <svg width="19" height="20" viewBox="0 0 19 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -683,7 +698,7 @@
       </a>
 
       <div class="s-b-hahs">
-        <p>精準分類，一秒找到最適合你和毛孩的餐廳和住宿<br>
+        <p class="smoove">精準分類，一秒找到最適合你和毛孩的餐廳和住宿<br>
           幫你避開「<span>偽寵物友善</span>」
         </p>
         <figure>
@@ -789,7 +804,7 @@
     </svg>
 
     <section id="play">
-      <div class="all-title">
+      <div class="all-title smoove">
         <div class="slogan">
           <h2>全台寵物活動，一站掌握不漏接</h2>
           <svg xmlns="http://www.w3.org/2000/svg" width="27" height="24" viewBox="0 0 27 24" fill="none">
@@ -807,7 +822,7 @@
       <figure class="flag"><img src="./images/flag.svg" alt=""></figure>
       <figure class="dancedog"><img src="./images/dancedog.svg" alt=""></figure>
       <div class="play-boxs">
-        <article class="play-box" data-no-paw>
+        <article class="play-box smoove" data-move-x="-500px" data-rotate="90deg">
           <h4>09/06（六）</h4>
           <h3>寵物市集</h3>
           <p>結合寵物用品、美食、攝影攤位，還有小型互動遊戲。讓飼主邊逛邊帶毛孩體驗週末市集的樂趣。</p>
@@ -825,7 +840,7 @@
                 d="M16.3281 11.1875C17.4758 11.1875 18.4062 9.99126 18.4062 8.51562C18.4062 7.03999 17.4758 5.84375 16.3281 5.84375C15.1804 5.84375 14.25 7.03999 14.25 8.51562C14.25 9.99126 15.1804 11.1875 16.3281 11.1875Z" />
             </svg>查看活動</a>
         </article>
-        <article class="play-box" data-no-paw>
+        <article class="play-box smoove" data-move-x="-250px" data-rotate="45deg" data-move-y="150px">
           <h4>09/13（六）</h4>
           <h3>寵物搭捷運日</h3>
           <p>和捷運公司合作，舉辦「毛孩一起搭捷運」的一日體驗，宣導正確攜帶方式，推廣寵物友善交通。</p>
@@ -843,7 +858,7 @@
                 d="M16.3281 11.1875C17.4758 11.1875 18.4062 9.99126 18.4062 8.51562C18.4062 7.03999 17.4758 5.84375 16.3281 5.84375C15.1804 5.84375 14.25 7.03999 14.25 8.51562C14.25 9.99126 15.1804 11.1875 16.3281 11.1875Z" />
             </svg>查看活動</a>
         </article>
-        <article class="play-box" data-no-paw>
+        <article class="play-box smoove" data-move-x="500px" data-rotate="-90deg">
           <h4>09/20（六）</h4>
           <h3>寵物野餐日</h3>
           <p>大草地上的毛孩野餐聚會，現場提供 DIY 寵物零食、遊戲區，主人與毛孩一起享受陽光午後。</p>
@@ -861,7 +876,7 @@
                 d="M16.3281 11.1875C17.4758 11.1875 18.4062 9.99126 18.4062 8.51562C18.4062 7.03999 17.4758 5.84375 16.3281 5.84375C15.1804 5.84375 14.25 7.03999 14.25 8.51562C14.25 9.99126 15.1804 11.1875 16.3281 11.1875Z" />
             </svg>查看活動</a>
         </article>
-        <article class="play-box" data-no-paw>
+        <article class="play-box smoove" data-no-paw data-move-x="-150px" data-rotate="45deg">
           <div class="p-box-title">
             <h4>09/27（六）</h4>
             <h3>寵物義診與健檢</h3>
@@ -881,7 +896,7 @@
                 d="M16.3281 11.1875C17.4758 11.1875 18.4062 9.99126 18.4062 8.51562C18.4062 7.03999 17.4758 5.84375 16.3281 5.84375C15.1804 5.84375 14.25 7.03999 14.25 8.51562C14.25 9.99126 15.1804 11.1875 16.3281 11.1875Z" />
             </svg>查看活動</a>
         </article>
-        <article class="play-box" data-no-paw>
+        <article class="play-box smoove" data-no-paw data-move-x="150px" data-rotate="-45deg">
           <div class="p-box-title">
             <h4>10/04（六）</h4>
             <h3>寵物領養日</h3>
@@ -917,17 +932,21 @@
         </svg>更多活動
       </a>
 
-      <figure class="liedog"><img src="./images/liedog.svg" alt=""></figure>
+      <figure class="liedog liedog1" data-no-paw>
+        <img class="dog-body" src="./images/liedognobody.svg" alt="">
+        <img class="dog-head" src="./images/liedoghead.svg" alt="">
+        <img class="dog-tail" src="./images/liedogtail.svg" alt="">
+      </figure>
     </section>
   </main>
   <footer>
     <div class="f-nav">
-      <h2>GOGOGO</h2>
-      <ul class="f-n-text">
-        <li><a href="#">關於我們</a></li>
-        <li><a href="#">餐廳</a></li>
-        <li><a href="#">住宿</a></li>
-        <li><a href="#">活動</a></li>
+      <h2 data-no-paw>GOGOGO</h2>
+      <ul class="f-n-text" data-no-paw>
+        <li><a href="#about">關於我們</a></li>
+        <li><a href="#eat">餐廳</a></li>
+        <li><a href="#stay">住宿</a></li>
+        <li><a href="#play">活動</a></li>
         <li><a href="#">會員中心</a></li>
       </ul>
 
@@ -940,8 +959,11 @@
   </footer>
 
 
+  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-smoove/0.2.10/jquery.smoove.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
   <script src="./js/script.js"></script>
 </body>
 

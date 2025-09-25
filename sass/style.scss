@@ -451,13 +451,15 @@ header {
     }
 
     h2 {
-        color: $primary2;
-        font-family: $family-tc;
-        font-size: $f-s-20;
-        font-style: normal;
-        font-weight: 700;
-        line-height: 24px;
-        letter-spacing: 0.15px;
+        a {
+            color: $primary2;
+            font-family: $family-tc;
+            font-size: $f-s-20;
+            font-style: normal;
+            font-weight: 700;
+            line-height: 24px;
+            letter-spacing: 0.15px;
+        }
     }
 
 
@@ -1055,6 +1057,12 @@ header {
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            transition: transform .25s ease-out;
+            will-change: transform;
+
+            &:hover figure {
+                transform: scale(1.2);
+            }
 
 
 
@@ -1087,6 +1095,14 @@ header {
             flex-direction: column;
             justify-content: center;
             align-items: center;
+
+            transition: transform .25s ease-out;
+            will-change: transform;
+
+            &:hover figure {
+                transform: scale(1.2);
+            }
+
 
             @media ($mediamd) {
                 transform: translateX(0px);
@@ -1123,6 +1139,13 @@ header {
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            transition: transform .25s ease-out;
+            will-change: transform;
+
+            &:hover figure {
+                transform: scale(1.2);
+            }
+
 
             @media ($mediamd) {
                 transform: translateX(0px);
@@ -1173,49 +1196,162 @@ header {
     .all-title {
         width: 100%;
 
-        figure {
+        /* 讓身體有層級可被比較 */
+        .feed .dog .dog-body {
+            position: relative;
+            /* ← 非 static 才吃 z-index */
+            z-index: 3;
+            /* 最高，蓋住接縫 */
+            display: block;
+        }
+
+        /* 前手在中層（會被身體邊線蓋到一點，接縫更自然） */
+        .feed .dog .dog-paw {
+            position: absolute;
+            z-index: 2;
+            /* 其餘定位/動畫維持原本 */
+        }
+
+        /* 尾巴在最底層 */
+        .feed .dog .dog-tail {
+            position: absolute;
+            z-index: 1;
+            /* 其餘定位/動畫維持原本 */
+        }
+
+        .feed {
+            /* 你原本的 figure 版面就保留 */
             width: 100%;
             display: flex;
             align-items: flex-end;
             padding-left: 180px;
             margin-bottom: -12px;
             margin-top: -110px;
-            gap: 15px;
+            gap: 10px;
 
             @media ($mediaxxl) {
                 padding-left: 100px;
             }
 
-
             @media ($mediaxl) {
-                padding-left: 0px;
-                transform: scale(0.8);
+                padding-left: 0;
+                transform: scale(.8);
             }
 
             @media ($mediamd) {
                 margin-top: 16px;
             }
 
-            // position: absolute;
-            // top: 150px;
-            // left: 200px;
-            img:first-child {
-                width: 213px;
-                height: 131px;
+
+
+            /* === 狗：以身體原始尺寸 205×137 當定位基準 === */
+            .dog {
+                position: relative;
+                width: 205px;
+                height: 137px;
+
+                .dog-body {
+                    width: 205px;
+                    height: 137px;
+                    display: block;
+                    z-index: 1;
+                }
+
+                /* 尾巴（37×64）：左右擺。left/top 先給接近值，視覺再微調 1–2px */
+                .dog-tail {
+                    position: absolute;
+                    width: 37px;
+                    height: 64px;
+                    left: 32px;
+                    /* ← 若有縫：±1~3px 微調 */
+                    top: 6px;
+
+                    transform-origin: 88% 86%;
+                    /* 尾根 pivot（若像從中間轉，Y 再高一點） */
+                    animation: wag .42s infinite alternate ease-in-out;
+                    pointer-events: none;
+                }
+
+                /* 前手（44×33）：往前伸，像要碰碗 */
+                .dog-paw {
+                    position: absolute;
+                    width: 44px;
+                    height: 33px;
+                    left: 146px;
+                    top: 106px;
+                    /* 接縫點，視覺微調即可 */
+                    transform-origin: 18% 42%;
+                    /* 手肘附近當 pivot */
+                    animation: reach 1.1s ease-in-out infinite;
+                    pointer-events: none;
+                    z-index: 1;
+                }
             }
 
-            img:nth-of-type(2) {
+            /* 碗（你前面用 88×55）：跟著前伸那一下小晃 */
+            .bowl {
                 width: 88px;
                 height: 55px;
+                transform-origin: 50% 90%;
+                animation: bowlshake 1.1s ease-in-out infinite;
+                /* 與 reach 同步 */
+            }
+        }
 
+        /* === 動畫們 === */
+        @keyframes wag {
+            from {
+                transform: rotate(16deg);
             }
 
+            to {
+                transform: rotate(-16deg);
+            }
+        }
 
-            // img{
-            //      @media ($mediaxl) {
-            //     transform: scale(0.7);
-            // }
-            // }
+        @keyframes reach {
+
+            0%,
+            100% {
+                transform: rotate(0) translate(0, 0);
+            }
+
+            50% {
+                transform: rotate(-8deg) translate(30px, -6px);
+            }
+
+            /* 前上推一下 */
+        }
+
+        @keyframes bowlshake {
+
+            0%,
+            100% {
+                transform: rotate(0) translateY(0);
+            }
+
+            40% {
+                transform: rotate(-6deg) translateY(-1px);
+            }
+
+            50% {
+                transform: rotate(6deg) translateY(-2px);
+            }
+
+            /* 對齊 reach 50% */
+            60% {
+                transform: rotate(-4deg) translateY(-1px);
+            }
+        }
+
+        /* 無障礙：偏好減少動畫則停用 */
+        @media (prefers-reduced-motion: reduce) {
+
+            .feed .dog-tail,
+            .feed .dog-paw,
+            .feed .bowl {
+                animation: none;
+            }
         }
     }
 
@@ -1308,7 +1444,7 @@ header {
             color: $primary1;
         }
 
-        figure {
+        .staydog {
             width: 100%;
             display: flex;
             justify-content: flex-end;
@@ -1342,7 +1478,7 @@ header {
             // position: absolute;
             // top: 150px;
             // left: 200px;
-            img:first-child {
+            .doghouse {
                 width: 168px;
                 height: 153px;
 
@@ -1353,15 +1489,93 @@ header {
 
             }
 
-            img:nth-of-type(2) {
-                width: 172.048px;
-                height: 132.847px;
+            // img:nth-of-type(2) {
+            //     width: 172.048px;
+            //     height: 132.847px;
+
+
+            // }
+
+            .liedog {
+                position: relative;
+                width: 180px; // 身體原始寬
+                height: 144px; // 身體原始高
+                transform: scaleX(-1);
 
                 @media ($mediaxl) {
-                    width: 120.43px;
-                    height: 92.99px;
+                    transform: scaleX(-1) scale(0.8) translatey(16%);
+                }
+
+                .dog-body {
+                    width: 180px;
+                    height: 144px;
+
+                    display: block;
+                }
+
+                .dog-tail {
+                    position: absolute;
+                    width: 44px; // 尾巴原始寬
+                    height: 49px; // 尾巴原始高
+                    left: 0px; // 你現在對齊接縫的 X（保留）
+                    top: 11px; // 你現在對齊接縫的 Y（保留）
+
+                    transform-origin: 86% 90%; // 你現在的 pivot（保留）
+
+                    animation: wag .42s infinite alternate ease-in-out;
+                    pointer-events: none;
+                }
+
+                /* 新增：頭（點頭） */
+                .dog-head {
+                    position: absolute;
+                    width: 104px; // 頭原始寬
+                    height: 95px; // 頭原始高
+                    left: 71px; // 初始估值：頸部對位（可微調 ±2~4px）
+                    top: 8px;
+
+                    /* 頸部當樞紐 */
+                    transform-origin: 22% 78%;
+
+                    animation: nod 1.4s ease-in-out infinite;
+                    pointer-events: none;
+                    z-index: 1; // 確保頭蓋在身體線條上（如需）
                 }
             }
+
+            /* 搖尾：只做旋轉即可（容器已經翻轉了） */
+            @keyframes wag {
+                from {
+                    transform: rotate(16deg);
+                }
+
+                to {
+                    transform: rotate(-16deg);
+                }
+            }
+
+            /* 點頭：中段下點，搭配一點位移更自然 */
+            @keyframes nod {
+
+                0%,
+                100% {
+                    transform: rotate(0deg) translateY(0);
+                }
+
+                50% {
+                    transform: rotate(11deg) translateY(3px);
+                }
+            }
+
+            /* 使用者偏好減少動畫時停用 */
+            @media (prefers-reduced-motion: reduce) {
+
+                .liedog .dog-tail,
+                .liedog .dog-head {
+                    animation: none;
+                }
+            }
+
 
         }
     }
@@ -1553,7 +1767,40 @@ header {
             img:first-child {
                 width: 159px;
                 height: 159px;
+                --speed: 0.5s;
+                /* 速度 */
+                --deg: 10deg;
+                /* 擺幅 */
+                --shift: 10px;
+                /* 微移位，較像真的搖 */
+                transform-origin: 50% 50%;
+                /* 以下方當樞紐：50%中間、85%靠下 */
+                animation: sway var(--speed) ease-in-out infinite alternate;
+                will-change: transform;
             }
+
+            @keyframes sway {
+                from {
+                    transform: rotate(-var(--deg)) translateX(calc(-1 * var(--shift)));
+                }
+
+                to {
+                    transform: rotate(var(--deg)) translateX(var(--shift));
+                }
+            }
+
+            /* 使用者偏好減少動畫 */
+            @media (prefers-reduced-motion: reduce) {
+                .swaydog img {
+                    animation: none;
+                }
+            }
+
+
+
+
+
+
 
             img:nth-of-type(2) {
                 width: 85px;
@@ -1929,6 +2176,8 @@ header {
         margin-bottom: -100px;
         z-index: 1;
 
+
+
         @media ($mediaxl) {
             padding-right: 0px;
         }
@@ -1936,22 +2185,145 @@ header {
         img {
             width: 141px;
             height: 196px;
+            --speed: 0.5s;
+            /* 速度 */
+            --deg: 10deg;
+            /* 擺幅 */
+            --shift: 10px;
+            /* 微移位，較像真的搖 */
+            transform-origin: 50% 50%;
+            /* 以下方當樞紐：50%中間、85%靠下 */
+            animation: sway var(--speed) ease-in-out infinite alternate;
+            will-change: transform;
         }
+
+        @keyframes sway {
+            from {
+                transform: rotate(-var(--deg)) translateX(calc(-1 * var(--shift)));
+            }
+
+            to {
+                transform: rotate(var(--deg)) translateX(var(--shift));
+            }
+        }
+
+        /* 使用者偏好減少動畫 */
+        @media (prefers-reduced-motion: reduce) {
+            .swaydog img {
+                animation: none;
+            }
+        }
+
     }
 
     .liedog {
-        width: 100%;
-        display: flex;
-        padding-left: 50px;
-        align-items: flex-end;
-        margin-bottom: -10px;
-        margin-top: -100px;
+        position: relative;
+        width: 180px; // 身體原始寬
+        height: 144px; // 身體原始高
+        margin-bottom: -20px;
+        right: 40%;
+        cursor: pointer;
 
-        img {
-            width: 172.048px;
-            height: 132.847px;
-            transform: scaleX(-1);
+        /* 文字泡泡 */
+        &::after {
+            content: "GO TO TOP";
+            position: absolute;
+            left: 50%;
+            bottom: 100%;
+            transform: translate(-50%, -8px) scale(.98);
+            background: $primary3;
+            color: $text;
+            font-weight: 500;
+            font-family: $family-en;
+            font-size: 12px;
+            letter-spacing: .08em;
+            white-space: nowrap;
+            padding: 10px 20px;
+            border-radius: 999px;
+            // box-shadow: 0 3px 10px rgba(0, 0, 0, .12);
+            opacity: 0;
+            pointer-events: none;
+            /* 不擋滑鼠 */
+            transition: opacity .18s ease, transform .18s ease;
+            z-index: 10;
+        }
 
+
+
+        /* 滑鼠或鍵盤聚焦時顯示 */
+        &:hover::after,
+        &:focus-visible::after {
+            opacity: 1;
+            transform: translate(-50%, -14px) scale(1);
+        }
+
+        .dog-body {
+            width: 180px;
+            height: 144px;
+
+            display: block;
+        }
+
+        .dog-tail {
+            position: absolute;
+            width: 44px; // 尾巴原始寬
+            height: 49px; // 尾巴原始高
+            left: 0px; // 你現在對齊接縫的 X（保留）
+            top: 11px; // 你現在對齊接縫的 Y（保留）
+
+            transform-origin: 86% 90%; // 你現在的 pivot（保留）
+
+            animation: wag .42s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+
+        /* 新增：頭（點頭） */
+        .dog-head {
+            position: absolute;
+            width: 104px; // 頭原始寬
+            height: 95px; // 頭原始高
+            left: 71px; // 初始估值：頸部對位（可微調 ±2~4px）
+            top: 8px;
+
+            /* 頸部當樞紐 */
+            transform-origin: 22% 78%;
+
+            animation: nod 1.4s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1; // 確保頭蓋在身體線條上（如需）
+        }
+    }
+
+    /* 搖尾：只做旋轉即可（容器已經翻轉了） */
+    @keyframes wag {
+        from {
+            transform: rotate(16deg);
+        }
+
+        to {
+            transform: rotate(-16deg);
+        }
+    }
+
+    /* 點頭：中段下點，搭配一點位移更自然 */
+    @keyframes nod {
+
+        0%,
+        100% {
+            transform: rotate(0deg) translateY(0);
+        }
+
+        50% {
+            transform: rotate(11deg) translateY(3px);
+        }
+    }
+
+    /* 使用者偏好減少動畫時停用 */
+    @media (prefers-reduced-motion: reduce) {
+
+        .liedog .dog-tail,
+        .liedog .dog-head {
+            animation: none;
         }
     }
 

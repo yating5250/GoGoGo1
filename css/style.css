@@ -517,7 +517,7 @@ header {
     padding: 8px 24px;
   }
 }
-header h2 {
+header h2 a {
   color: #F0945B;
   font-family: "Noto Sans TC";
   font-size: 1.25rem;
@@ -889,6 +889,11 @@ header ul li:nth-child(4) a {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  transition: transform 0.25s ease-out;
+  will-change: transform;
+}
+#about .about-box .circle:hover figure {
+  transform: scale(1.2);
 }
 #about .about-box .circle figure {
   width: 72px;
@@ -911,6 +916,11 @@ header ul li:nth-child(4) a {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  transition: transform 0.25s ease-out;
+  will-change: transform;
+}
+#about .about-box .square:hover figure {
+  transform: scale(1.2);
 }
 @media (max-width:750px) {
   #about .about-box .square {
@@ -938,6 +948,11 @@ header ul li:nth-child(4) a {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  transition: transform 0.25s ease-out;
+  will-change: transform;
+}
+#about .about-box .triangle:hover figure {
+  transform: scale(1.2);
 }
 @media (max-width:750px) {
   #about .about-box .triangle {
@@ -970,39 +985,140 @@ header ul li:nth-child(4) a {
 }
 #eat .all-title {
   width: 100%;
+  /* 讓身體有層級可被比較 */
+  /* 前手在中層（會被身體邊線蓋到一點，接縫更自然） */
+  /* 尾巴在最底層 */
+  /* === 動畫們 === */
+  /* 無障礙：偏好減少動畫則停用 */
 }
-#eat .all-title figure {
+#eat .all-title .feed .dog .dog-body {
+  position: relative;
+  /* ← 非 static 才吃 z-index */
+  z-index: 3;
+  /* 最高，蓋住接縫 */
+  display: block;
+}
+#eat .all-title .feed .dog .dog-paw {
+  position: absolute;
+  z-index: 2;
+  /* 其餘定位/動畫維持原本 */
+}
+#eat .all-title .feed .dog .dog-tail {
+  position: absolute;
+  z-index: 1;
+  /* 其餘定位/動畫維持原本 */
+}
+#eat .all-title .feed {
+  /* 你原本的 figure 版面就保留 */
   width: 100%;
   display: flex;
   align-items: flex-end;
   padding-left: 180px;
   margin-bottom: -12px;
   margin-top: -110px;
-  gap: 15px;
+  gap: 10px;
+  /* === 狗：以身體原始尺寸 205×137 當定位基準 === */
+  /* 碗（你前面用 88×55）：跟著前伸那一下小晃 */
 }
 @media (max-width:1250px) {
-  #eat .all-title figure {
+  #eat .all-title .feed {
     padding-left: 100px;
   }
 }
 @media (max-width:1080px) {
-  #eat .all-title figure {
-    padding-left: 0px;
+  #eat .all-title .feed {
+    padding-left: 0;
     transform: scale(0.8);
   }
 }
 @media (max-width:750px) {
-  #eat .all-title figure {
+  #eat .all-title .feed {
     margin-top: 16px;
   }
 }
-#eat .all-title figure img:first-child {
-  width: 213px;
-  height: 131px;
+#eat .all-title .feed .dog {
+  position: relative;
+  width: 205px;
+  height: 137px;
+  /* 尾巴（37×64）：左右擺。left/top 先給接近值，視覺再微調 1–2px */
+  /* 前手（44×33）：往前伸，像要碰碗 */
 }
-#eat .all-title figure img:nth-of-type(2) {
+#eat .all-title .feed .dog .dog-body {
+  width: 205px;
+  height: 137px;
+  display: block;
+  z-index: 1;
+}
+#eat .all-title .feed .dog .dog-tail {
+  position: absolute;
+  width: 37px;
+  height: 64px;
+  left: 32px;
+  /* ← 若有縫：±1~3px 微調 */
+  top: 6px;
+  transform-origin: 88% 86%;
+  /* 尾根 pivot（若像從中間轉，Y 再高一點） */
+  animation: wag 0.42s infinite alternate ease-in-out;
+  pointer-events: none;
+}
+#eat .all-title .feed .dog .dog-paw {
+  position: absolute;
+  width: 44px;
+  height: 33px;
+  left: 146px;
+  top: 106px;
+  /* 接縫點，視覺微調即可 */
+  transform-origin: 18% 42%;
+  /* 手肘附近當 pivot */
+  animation: reach 1.1s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+#eat .all-title .feed .bowl {
   width: 88px;
   height: 55px;
+  transform-origin: 50% 90%;
+  animation: bowlshake 1.1s ease-in-out infinite;
+  /* 與 reach 同步 */
+}
+@keyframes wag {
+  from {
+    transform: rotate(16deg);
+  }
+  to {
+    transform: rotate(-16deg);
+  }
+}
+@keyframes reach {
+  0%, 100% {
+    transform: rotate(0) translate(0, 0);
+  }
+  50% {
+    transform: rotate(-8deg) translate(30px, -6px);
+  }
+  /* 前上推一下 */
+}
+@keyframes bowlshake {
+  0%, 100% {
+    transform: rotate(0) translateY(0);
+  }
+  40% {
+    transform: rotate(-6deg) translateY(-1px);
+  }
+  50% {
+    transform: rotate(6deg) translateY(-2px);
+  }
+  /* 對齊 reach 50% */
+  60% {
+    transform: rotate(-4deg) translateY(-1px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #eat .all-title .feed .dog-tail,
+  #eat .all-title .feed .dog-paw,
+  #eat .all-title .feed .bowl {
+    animation: none;
+  }
 }
 @media (max-width:1350px) {
   #eat .choices .choice:nth-child(n+8) {
@@ -1066,7 +1182,7 @@ header ul li:nth-child(4) a {
 #stay .all-title p {
   color: #2A77BD;
 }
-#stay .all-title figure {
+#stay .all-title .staydog {
   width: 100%;
   display: flex;
   justify-content: flex-end;
@@ -1075,47 +1191,101 @@ header ul li:nth-child(4) a {
   margin-top: -120px;
   padding-right: 130px;
   gap: 25px;
+  /* 搖尾：只做旋轉即可（容器已經翻轉了） */
+  /* 點頭：中段下點，搭配一點位移更自然 */
+  /* 使用者偏好減少動畫時停用 */
 }
 @media (max-width:1250px) {
-  #stay .all-title figure {
+  #stay .all-title .staydog {
     padding-right: 70px;
   }
 }
 @media (max-width:1080px) {
-  #stay .all-title figure {
+  #stay .all-title .staydog {
     gap: 0px;
     margin-top: -85px;
   }
 }
 @media (max-width:820px) {
-  #stay .all-title figure {
+  #stay .all-title .staydog {
     padding-right: 0px;
   }
 }
 @media (max-width:750px) {
-  #stay .all-title figure {
+  #stay .all-title .staydog {
     margin-top: 16px;
     padding-right: 24px;
   }
 }
-#stay .all-title figure img:first-child {
+#stay .all-title .staydog .doghouse {
   width: 168px;
   height: 153px;
 }
 @media (max-width:1080px) {
-  #stay .all-title figure img:first-child {
+  #stay .all-title .staydog .doghouse {
     width: 117.6px;
     height: 107.1px;
   }
 }
-#stay .all-title figure img:nth-of-type(2) {
-  width: 172.048px;
-  height: 132.847px;
+#stay .all-title .staydog .liedog {
+  position: relative;
+  width: 180px;
+  height: 144px;
+  transform: scaleX(-1);
+  /* 新增：頭（點頭） */
 }
 @media (max-width:1080px) {
-  #stay .all-title figure img:nth-of-type(2) {
-    width: 120.43px;
-    height: 92.99px;
+  #stay .all-title .staydog .liedog {
+    transform: scaleX(-1) scale(0.8) translatey(16%);
+  }
+}
+#stay .all-title .staydog .liedog .dog-body {
+  width: 180px;
+  height: 144px;
+  display: block;
+}
+#stay .all-title .staydog .liedog .dog-tail {
+  position: absolute;
+  width: 44px;
+  height: 49px;
+  left: 0px;
+  top: 11px;
+  transform-origin: 86% 90%;
+  animation: wag 0.42s infinite alternate ease-in-out;
+  pointer-events: none;
+}
+#stay .all-title .staydog .liedog .dog-head {
+  position: absolute;
+  width: 104px;
+  height: 95px;
+  left: 71px;
+  top: 8px;
+  /* 頸部當樞紐 */
+  transform-origin: 22% 78%;
+  animation: nod 1.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes wag {
+  from {
+    transform: rotate(16deg);
+  }
+  to {
+    transform: rotate(-16deg);
+  }
+}
+@keyframes nod {
+  0%, 100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  50% {
+    transform: rotate(11deg) translateY(3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #stay .all-title .staydog .liedog .dog-tail,
+  #stay .all-title .staydog .liedog .dog-head {
+    animation: none;
   }
 }
 #stay .choicebox .line {
@@ -1242,6 +1412,7 @@ header ul li:nth-child(4) a {
   padding-left: 150px;
   margin-bottom: -40px;
   z-index: 10;
+  /* 使用者偏好減少動畫 */
 }
 @media (max-width:750px) {
   #stay .s-b-hahs figure {
@@ -1253,6 +1424,29 @@ header ul li:nth-child(4) a {
 #stay .s-b-hahs figure img:first-child {
   width: 159px;
   height: 159px;
+  --speed: 0.5s;
+  /* 速度 */
+  --deg: 10deg;
+  /* 擺幅 */
+  --shift: 10px;
+  /* 微移位，較像真的搖 */
+  transform-origin: 50% 50%;
+  /* 以下方當樞紐：50%中間、85%靠下 */
+  animation: sway var(--speed) ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes sway {
+  from {
+    transform: rotate(-var(--deg)) translateX(calc(-1 * var(--shift)));
+  }
+  to {
+    transform: rotate(var(--deg)) translateX(var(--shift));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #stay .s-b-hahs figure .swaydog img {
+    animation: none;
+  }
 }
 #stay .s-b-hahs figure img:nth-of-type(2) {
   width: 85px;
@@ -1398,6 +1592,9 @@ header ul li:nth-child(4) a {
   align-items: center;
   padding-top: 70px;
   position: relative;
+  /* 搖尾：只做旋轉即可（容器已經翻轉了） */
+  /* 點頭：中段下點，搭配一點位移更自然 */
+  /* 使用者偏好減少動畫時停用 */
 }
 #play .all-title {
   width: 100%;
@@ -1440,6 +1637,7 @@ header ul li:nth-child(4) a {
   padding-right: 35px;
   margin-bottom: -100px;
   z-index: 1;
+  /* 使用者偏好減少動畫 */
 }
 @media (max-width:1080px) {
   #play .dancedog {
@@ -1449,19 +1647,114 @@ header ul li:nth-child(4) a {
 #play .dancedog img {
   width: 141px;
   height: 196px;
+  --speed: 0.5s;
+  /* 速度 */
+  --deg: 10deg;
+  /* 擺幅 */
+  --shift: 10px;
+  /* 微移位，較像真的搖 */
+  transform-origin: 50% 50%;
+  /* 以下方當樞紐：50%中間、85%靠下 */
+  animation: sway var(--speed) ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes sway {
+  from {
+    transform: rotate(-var(--deg)) translateX(calc(-1 * var(--shift)));
+  }
+  to {
+    transform: rotate(var(--deg)) translateX(var(--shift));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #play .dancedog .swaydog img {
+    animation: none;
+  }
 }
 #play .liedog {
-  width: 100%;
-  display: flex;
-  padding-left: 50px;
-  align-items: flex-end;
-  margin-bottom: -10px;
-  margin-top: -100px;
+  position: relative;
+  width: 180px;
+  height: 144px;
+  margin-bottom: -20px;
+  right: 40%;
+  cursor: pointer;
+  /* 文字泡泡 */
+  /* 滑鼠或鍵盤聚焦時顯示 */
+  /* 新增：頭（點頭） */
 }
-#play .liedog img {
-  width: 172.048px;
-  height: 132.847px;
-  transform: scaleX(-1);
+#play .liedog::after {
+  content: "GO TO TOP";
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translate(-50%, -8px) scale(0.98);
+  background: #FAE24C;
+  color: #1F0C01;
+  font-weight: 500;
+  font-family: "Roboto";
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  padding: 10px 20px;
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  /* 不擋滑鼠 */
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 10;
+}
+#play .liedog:hover::after, #play .liedog:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, -14px) scale(1);
+}
+#play .liedog .dog-body {
+  width: 180px;
+  height: 144px;
+  display: block;
+}
+#play .liedog .dog-tail {
+  position: absolute;
+  width: 44px;
+  height: 49px;
+  left: 0px;
+  top: 11px;
+  transform-origin: 86% 90%;
+  animation: wag 0.42s infinite alternate ease-in-out;
+  pointer-events: none;
+}
+#play .liedog .dog-head {
+  position: absolute;
+  width: 104px;
+  height: 95px;
+  left: 71px;
+  top: 8px;
+  /* 頸部當樞紐 */
+  transform-origin: 22% 78%;
+  animation: nod 1.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes wag {
+  from {
+    transform: rotate(16deg);
+  }
+  to {
+    transform: rotate(-16deg);
+  }
+}
+@keyframes nod {
+  0%, 100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  50% {
+    transform: rotate(11deg) translateY(3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #play .liedog .dog-tail,
+  #play .liedog .dog-head {
+    animation: none;
+  }
 }
 #play .play-boxs {
   width: 100%;
